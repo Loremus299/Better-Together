@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: testing
+      POSTGRES_PASSWORD: queer
+    ports:
+      - "5432:5432"
+  rustfs:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ROOT_USER: testing
+      RUSTFS_ROOT_PASSWORD: queer
+    ports:
+      - "9000:9000"
+      - "9001:9001"
