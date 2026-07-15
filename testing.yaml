@@ -6,6 +6,8 @@ services:
       POSTGRES_PASSWORD: queer
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   rustfs:
     image: rustfs/rustfs:latest
     environment:
@@ -14,3 +16,8 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    volumes:
+      - rustfs_data:/data
+volumes:
+  postgres_data:
+  rustfs_data:
