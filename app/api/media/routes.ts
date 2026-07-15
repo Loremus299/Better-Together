@@ -6,6 +6,7 @@ import { useLogger, withEvlog } from "@/lib/evlog";
 import { s3 } from "@/lib/s3";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createId } from "@paralleldrive/cuid2";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -28,12 +29,12 @@ export const POST = withEvlog(async (request: NextRequest): Promise<NextResponse
   }
   log.set({ fileName: parsedData.data.file.name })
 
-  const key = `${createId()}-${parsedData.data.file.type}`
+  const key = `${createId()}-${parsedData.data.file.type.replaceAll("/", "-")}`
   try {
     await s3.send(new PutObjectCommand({
       Bucket: env.S3_BUCKET,
       Key: key,
-      Body: parsedData.data.file
+      Body: Buffer.from(await parsedData.data.file.arrayBuffer()),
     }))
     const dbLog = await db.insert(mediaTable).values({ key: key, owner: session.user.id }).returning({ id: mediaTable.id })
     if (!dbLog[0]) {
@@ -49,4 +50,44 @@ export const POST = withEvlog(async (request: NextRequest): Promise<NextResponse
     }))
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 })
   }
+})
+
+export const DELETE = withEvlog(async (request: NextRequest): Promise<NextResponse> => {
+  const log = useLogger()
+  const head = await headers()
+  const session = await auth.api.getSession({ headers: head })
+  if (!session) {
+    return NextResponse.json({ error: "User session does not exist" }, { status: 401 })
+  }
+  log.set({ user: session.user.id })
+
+  const schema = z.object({
+    id: z.string().min(1)
+  })
+  const parsedData = schema.safeParse(await request.formData())
+  if (!parsedData.success) {
+    return NextResponse.json({ error: z.treeifyError(parsedData.error) }, { status: 400 })
+  }
+  log.set({ id: parsedData.data.id })
+
+  const key = await db
+    .delete(mediaTable)
+    .where(and(
+      eq(mediaTable.id, parsedData.data.id),
+      eq(mediaTable.owner, session.user.id)
+    ))
+    .returning({ key: mediaTable.key })
+
+  if (!key[0]) {
+    return NextResponse.json({ error: "File not found" }, { status: 404 })
+  }
+
+  log.set({ key: key[0].key })
+
+  await s3.send(new DeleteObjectCommand({
+    Bucket: env.S3_BUCKET,
+    Key: key[0].key
+  }))
+
+  return NextResponse.json({ log: "successfully deleted file" }, { status: 200 })
 })
