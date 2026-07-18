@@ -7,6 +7,7 @@ export const habitTable = pgTable("habit", {
   id: text("id").primaryKey().$defaultFn(() => createId()),
   name: text("name").notNull(),
   description: text("description").notNull(),
+  admin: text("admin").references(() => user.id, { onDelete: "restrict" }).notNull(),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow().$onUpdate(() => new Date()),
 })
