@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { mediaTable } from "./media";
 
@@ -7,6 +7,8 @@ export const habitTable = pgTable("habit", {
   id: text("id").primaryKey().$defaultFn(() => createId()),
   name: text("name").notNull(),
   description: text("description").notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow().$onUpdate(() => new Date()),
 })
 
 export const habitMembersTable = pgTable("habitMembers", {
