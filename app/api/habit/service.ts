@@ -155,7 +155,7 @@ async function addMemberToHabit({
     return isOk(null);
   } catch (e) {
     log.error("500", e as string);
-    return isError("Could not add member");
+    return isError("Could not add member.");
   }
 }
 
