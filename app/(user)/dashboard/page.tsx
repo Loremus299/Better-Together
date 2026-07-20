@@ -4,14 +4,16 @@ import { redirect } from "next/navigation";
 import { HabitDisplay } from "./_components/habitDisplay";
 
 export default async function DashboardPage() {
-  const header = await headers()
-  const session = await auth.api.getSession({ headers: header })
+  const header = await headers();
+  const session = await auth.api.getSession({ headers: header });
 
-  if (!(session?.user)) {
-    redirect('/auth/login')
+  if (!session?.user) {
+    redirect("/auth/login");
   }
 
-  return <main>
-    <HabitDisplay />
-  </main>
+  return (
+    <main>
+      <HabitDisplay />
+    </main>
+  );
 }
