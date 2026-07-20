@@ -24,7 +24,7 @@ export const habitTasksTable = pgTable("habitTasks", {
   task: text("task").notNull()
 })
 
-const proofStatusEnum = pgEnum("proofStatus", ["pending", "accepted", "declined"])
+export const proofStatusEnum = pgEnum("proofStatus", ["pending", "accepted", "declined"])
 
 export const habitProofsTable = pgTable("habitProofs", {
   id: text("id").primaryKey().$defaultFn(() => createId()),

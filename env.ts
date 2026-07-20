@@ -15,6 +15,8 @@ export const env = createEnv({
     S3_ACCESSKEYID: z.string().default("testing"),
     S3_SECRETACCESSKEY: z.string().default("queer"),
     S3_BUCKET: z.string().default("mouth"),
+
+    BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
   },
   clientPrefix: "NEXT_PUBLIC_",
   client: {
