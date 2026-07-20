@@ -9,7 +9,7 @@ import { auth } from "@/lib/auth";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, InferSelectModel } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { headers } from "next/headers";
 
 async function createNewHabit({
@@ -52,6 +52,36 @@ async function createNewHabit({
   } catch (e) {
     log.error("500", e as string);
     return isError("Could not create habit.");
+  }
+}
+
+async function editHabit({ habit, description, name }: { habit: string, description: string, name: string }) {
+  const header = await headers();
+  const session = await auth.api.getSession({ headers: header });
+
+  if (!session?.user) {
+    log.error("401", "User not logged in");
+    return isError("Please login before editing a habit.");
+  }
+
+  const getHabit = await db.select().from(habitTable).where(eq(habitTable.id, habit))
+
+  if (getHabit.length == 0) {
+    log.error("404", "Habit not found")
+    return isError("No habit found")
+  }
+
+  if (getHabit[0].admin !== session.user.id) {
+    log.error("401", "User cannot edit habit")
+    return isError("Only admins can edit habits.")
+  }
+
+  try {
+    await db.update(habitTable).set({ description, name }).where(eq(habitTable.id, habit))
+    return isOk(null)
+  } catch (e) {
+    log.error("500", e as string)
+    return isError("Could not edit habit.")
   }
 }
 
@@ -106,7 +136,7 @@ async function addMemberToHabit({
     .where(eq(habitTable.id, habit));
   if (!(checkAuthority[0].admin == session.user.id)) {
     log.error("400", "User doesn't have authority to add members.");
-    return isError("Only Admins can add members.");
+    return isError("Only admins can add members.");
   }
 
   const validateMember = await db
@@ -126,6 +156,39 @@ async function addMemberToHabit({
   } catch (e) {
     log.error("500", e as string);
     return isError("Could not add member");
+  }
+}
+
+async function removeMemberFromHabit({ member, habit }: { member: string, habit: string }) {
+  const header = await headers();
+  const session = await auth.api.getSession({ headers: header });
+
+  if (!session?.user) {
+    log.error("401", "User not logged in.");
+    return isError("Please login before removing a member.");
+  }
+
+  const getHabit = await db.select().from(habitTable).where(eq(habitTable.id, habit))
+
+  if (getHabit.length == 0) {
+    log.error("404", "Habit not found")
+    return isError("No habit found")
+  }
+
+  if (getHabit[0].admin !== session.user.id) {
+    log.error("401", "User cannot remove members.")
+    return isError("Only admins can remove members.")
+  }
+
+  try {
+    await db.delete(habitMembersTable).where(and(
+      eq(habitMembersTable.habit, habit),
+      eq(habitMembersTable.member, member)
+    ))
+    return isOk(null)
+  } catch (e) {
+    log.error("500", e as string)
+    return isError("Could not add member")
   }
 }
 
@@ -164,7 +227,9 @@ async function addTaskToHabit({
 
 export const habitService = {
   createNewHabit,
+  editHabit,
   getHabits,
   addMemberToHabit,
+  removeMemberFromHabit,
   addTaskToHabit,
 };
