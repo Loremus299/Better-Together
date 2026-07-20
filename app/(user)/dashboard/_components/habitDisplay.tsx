@@ -1,5 +1,6 @@
 import { habitService } from "@/app/api/habit/service";
 import Loader from "@/components/loader";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export async function HabitDisplay() {
@@ -11,9 +12,15 @@ export async function HabitDisplay() {
   if (habits.data.length == 0) {
     return (
       <Loader>
-        <div>
-          You are not part of any habits. Ask your partners to invite you. Or
-          create one.
+        <div className="text-center">
+          You are not part of any habits. <br />
+          Ask your partner to invite you. Or{" "}
+          <Link
+            href="/new"
+            className="underline hover:text-primary duration-150"
+          >
+            create one
+          </Link>
         </div>
       </Loader>
     );
