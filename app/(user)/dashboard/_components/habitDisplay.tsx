@@ -3,8 +3,8 @@ import Loader from "@/components/loader";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export async function HabitDisplay() {
-  const [habits] = await Promise.all([habitService.getHabits()]);
+export async function HabitDisplay({ userId }: { userId: string }) {
+  const [habits] = await Promise.all([habitService.getHabits({ userId })]);
   if (!habits.success) {
     redirect(`/error?e=${encodeURIComponent(habits.error)}`);
   }

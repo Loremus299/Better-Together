@@ -18,7 +18,7 @@ async function createNewHabit({
   name: string;
   description: string;
   userId: string
-}): Promise<Result<null, string>> {
+}): Promise<Result<string, string>> {
   const id = createId();
 
   try {
@@ -40,7 +40,7 @@ async function createNewHabit({
         .values({ habit: id, task: "Create tasks for habit." });
     });
 
-    return isOk(null);
+    return isOk(id);
   } catch (e) {
     log.error("500", e as string);
     return isError("Could not create habit.");
