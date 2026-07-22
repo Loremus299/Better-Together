@@ -3,7 +3,7 @@
 import { habitService } from "@/app/api/habit/service"
 import { auth } from "@/lib/auth"
 import { useLogger, withEvlog } from "@/lib/evlog"
-import { Result } from "@/lib/result"
+import { isError, isOk, Result } from "@/lib/result"
 import { headers } from "next/headers"
 import { FormValues } from "./common"
 
@@ -15,7 +15,7 @@ export const createNewHabitAction = withEvlog(async (values: FormValues): Promis
 
   if (!session) {
     log.error("No Login.");
-    return { success: false, error: "Please login before creating new habit." }
+    return isError("Please login before creating new habit.")
   }
   log.set({ userId: session.user.id })
 
@@ -23,9 +23,9 @@ export const createNewHabitAction = withEvlog(async (values: FormValues): Promis
 
   if (!req.success) {
     log.error(req.error)
-    return { success: false, error: req.error }
+    return isError(req.error)
   }
 
   log.set({ habitId: req.data })
-  return { success: true, data: req.data }
+  return isOk(req.data)
 })
