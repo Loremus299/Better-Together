@@ -5,38 +5,30 @@ import {
   habitTable,
   habitTasksTable,
 } from "@/db/schemas/habit";
-import { auth } from "@/lib/auth";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, InferSelectModel } from "drizzle-orm";
-import { headers } from "next/headers";
 
 async function createNewHabit({
   name,
   description,
+  userId
 }: {
   name: string;
   description: string;
+  userId: string
 }): Promise<Result<null, string>> {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in");
-    return isError("Please login before creating a new habit.");
-  }
-
   const id = createId();
 
   try {
     await db.transaction(async (tx) => {
       await tx
         .insert(habitTable)
-        .values({ id, name, description, admin: session.user.id });
+        .values({ id, name, description, admin: userId });
       await tx
         .insert(habitMembersTable)
-        .values({ habit: id, member: session.user.id });
+        .values({ habit: id, member: userId });
       await tx
         .insert(habitTasksTable)
         .values({
@@ -55,15 +47,7 @@ async function createNewHabit({
   }
 }
 
-async function editHabit({ habit, description, name }: { habit: string, description: string, name: string }) {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in");
-    return isError("Please login before editing a habit.");
-  }
-
+async function editHabit({ habit, description, name, userId }: { habit: string, description: string, name: string, userId: string }) {
   const getHabit = await db.select().from(habitTable).where(eq(habitTable.id, habit))
 
   if (getHabit.length == 0) {
@@ -71,7 +55,7 @@ async function editHabit({ habit, description, name }: { habit: string, descript
     return isError("No habit found")
   }
 
-  if (getHabit[0].admin !== session.user.id) {
+  if (getHabit[0].admin !== userId) {
     log.error("401", "User cannot edit habit")
     return isError("Only admins can edit habits.")
   }
@@ -85,15 +69,7 @@ async function editHabit({ habit, description, name }: { habit: string, descript
   }
 }
 
-async function getHabits(): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in");
-    return isError("No user is logged in.");
-  }
-
+async function getHabits({ userId }: { userId: string }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
   try {
     const habitDetails = await db
       .select({
@@ -106,7 +82,7 @@ async function getHabits(): Promise<Result<InferSelectModel<typeof habitTable>[]
       })
       .from(habitMembersTable)
       .innerJoin(habitTable, eq(habitTable.id, habitMembersTable.habit))
-      .where(eq(habitMembersTable.member, session.user.id));
+      .where(eq(habitMembersTable.member, userId));
 
     return isOk(habitDetails);
   } catch (e) {
@@ -118,23 +94,17 @@ async function getHabits(): Promise<Result<InferSelectModel<typeof habitTable>[]
 async function addMemberToHabit({
   habit,
   memberEmail,
+  userId
 }: {
   habit: string;
   memberEmail: string;
+  userId: string
 }): Promise<Result<null, string>> {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in.");
-    return isError("Please login before adding a member to a habit.");
-  }
-
   const checkAuthority = await db
     .select({ admin: habitTable.admin })
     .from(habitTable)
     .where(eq(habitTable.id, habit));
-  if (!(checkAuthority[0].admin == session.user.id)) {
+  if (!(checkAuthority[0].admin == userId)) {
     log.error("400", "User doesn't have authority to add members.");
     return isError("Only admins can add members.");
   }
@@ -159,15 +129,7 @@ async function addMemberToHabit({
   }
 }
 
-async function removeMemberFromHabit({ member, habit }: { member: string, habit: string }) {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in.");
-    return isError("Please login before removing a member.");
-  }
-
+async function removeMemberFromHabit({ member, habit, userId }: { member: string, habit: string, userId: string }) {
   const getHabit = await db.select().from(habitTable).where(eq(habitTable.id, habit))
 
   if (getHabit.length == 0) {
@@ -175,7 +137,7 @@ async function removeMemberFromHabit({ member, habit }: { member: string, habit:
     return isError("No habit found")
   }
 
-  if (getHabit[0].admin !== session.user.id) {
+  if (getHabit[0].admin !== userId) {
     log.error("401", "User cannot remove members.")
     return isError("Only admins can remove members.")
   }
@@ -195,23 +157,17 @@ async function removeMemberFromHabit({ member, habit }: { member: string, habit:
 async function addTaskToHabit({
   habit,
   task,
+  userId
 }: {
   habit: string;
   task: string;
+  userId: string
 }): Promise<Result<null, string>> {
-  const header = await headers();
-  const session = await auth.api.getSession({ headers: header });
-
-  if (!session?.user) {
-    log.error("401", "User not logged in.");
-    return isError("Please login before adding a member to a habit.");
-  }
-
   const checkAuthority = await db
     .select({ admin: habitTable.admin })
     .from(habitTable)
     .where(eq(habitTable.id, habit));
-  if (!(checkAuthority[0].admin == session.user.id)) {
+  if (!(checkAuthority[0].admin == userId)) {
     log.error("400", "User doesn't have authority to add tasks");
     return isError("Only Admins can add tasks.");
   }
