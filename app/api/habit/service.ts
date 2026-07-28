@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { and, eq } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 
 async function isUserAdmin({
   userId,
@@ -21,7 +21,7 @@ async function isUserAdmin({
 
     if (habitById.length == 0) {
       log.error("404", "Habit Not Found");
-      isError("Habit not found.");
+      return isError("Habit not found.");
     }
 
     if (habitById[0].admin == userId) {
@@ -58,10 +58,10 @@ async function isUserMember({
       );
 
     if (isMember.length == 0) {
-      log.info("status", "is member");
+      log.info("status", "is not member");
       return isOk(false);
     } else {
-      log.info("status", "is not member");
+      log.info("status", "is member");
       return isOk(true);
     }
   } catch (error) {
@@ -74,21 +74,24 @@ async function isUserMember({
 
 async function createTaskInHabit({
   userId,
+  habitId,
   taskName,
   taskDescription,
-  habitId,
   tx = db,
 }: {
   userId: string;
+  habitId: string;
   taskName: string;
   taskDescription: string;
-  habitId: string;
+
   tx: typeof db;
 }): Promise<Result<string, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
   if (!isAdmin.success) {
     return isError(isAdmin.error);
   }
+
   if (!isAdmin.data) {
     log.error("403", "Forbidden");
     return isError("Only admins can add tasks.");
@@ -112,6 +115,48 @@ async function createTaskInHabit({
   }
 }
 
+async function readTaskById({
+  userId,
+  habitId,
+  taskId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  taskId: string;
+  tx: typeof db;
+}): Promise<Result<InferSelectModel<typeof habitTasksTable>, string>> {
+  const isMember = await isUserMember({ userId, habitId, tx });
+
+  if (!isMember.success) {
+    return isError(isMember.error);
+  }
+
+  if (!isMember.data) {
+    log.error("403", "Forbidden");
+    return isError("You are not a member in the habit.");
+  }
+
+  try {
+    const task = await tx
+      .select()
+      .from(habitTasksTable)
+      .where(
+        and(eq(habitTasksTable.id, taskId), eq(habitTasksTable.habit, habitId)),
+      );
+
+    if (task.length == 0) {
+      log.error("404", "No such task found");
+      return isError("The task could not be found.");
+    }
+
+    return isOk(task[0]);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Task could not be read.");
+  }
+}
+
 async function updateTaskInHabit({
   userId,
   habitId,
@@ -126,7 +171,7 @@ async function updateTaskInHabit({
   taskName: string;
   taskDescription: string;
   tx: typeof db;
-}) {
+}): Promise<Result<undefined, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
   if (!isAdmin.success) {
     return isError(isAdmin.error);
@@ -144,6 +189,7 @@ async function updateTaskInHabit({
         description: taskDescription,
       })
       .where(eq(habitTasksTable.id, taskId));
+    return isOk(undefined);
   } catch (error) {
     log.error("500", error as string);
     return isError("Could not edit task.");
@@ -154,5 +200,6 @@ export const habitService = {
   isUserAdmin,
   isUserMember,
   createTaskInHabit,
+  readTaskById,
   updateTaskInHabit,
 };
