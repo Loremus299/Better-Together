@@ -4,6 +4,8 @@ import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
 import { and, eq, InferSelectModel } from "drizzle-orm";
 
+async function createHabit() {}
+
 async function isUserAdmin({
   userId,
   habitId,
