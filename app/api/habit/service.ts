@@ -2,9 +2,7 @@ import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { and, eq, InferSelectModel } from "drizzle-orm";
-
-async function createHabit() {}
+import { and, eq, getColumns, InferSelectModel, isNull } from "drizzle-orm";
 
 async function isUserAdmin({
   userId,
@@ -74,7 +72,155 @@ async function isUserMember({
   }
 }
 
-async function createTaskInHabit({
+async function createHabit({
+  name,
+  description,
+  header,
+  admin,
+  tx = db,
+}: {
+  userId: string;
+  name: string;
+  description: string;
+  header: string;
+  admin: string;
+  tx: typeof db;
+}): Promise<Result<string, string>> {
+  try {
+    const habitId = await tx
+      .insert(habitTable)
+      .values({ name, admin, description, header })
+      .returning({ id: habitTable.id });
+
+    return isOk(habitId[0].id);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError(error as string);
+  }
+}
+
+async function readHabitById({
+  userId,
+  habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<InferSelectModel<typeof habitTable>, string>> {
+  const isMember = await isUserMember({ userId, habitId, tx });
+
+  if (!isMember.success) {
+    return isError(isMember.error);
+  }
+
+  if (!isMember.data) {
+    log.error("403", "Forbidden");
+    return isError("You are not a member of this habit.");
+  }
+
+  try {
+    return isOk(
+      (await tx.select().from(habitTable).where(eq(habitTable.id, habitId)))[0],
+    );
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not fetch habit.");
+  }
+}
+
+async function readAllHabitsByUser({
+  userId,
+  tx = db,
+}: {
+  userId: string;
+  tx: typeof db;
+}): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
+  try {
+    return isOk(
+      await tx
+        .select(getColumns(habitTable))
+        .from(habitTable)
+        .innerJoin(
+          habitMembersTable,
+          eq(habitMembersTable.habit, habitTable.id),
+        )
+        .where(eq(habitMembersTable.member, userId)),
+    );
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not find your habits.");
+  }
+}
+
+async function updateHabit({
+  userId,
+  habitId,
+  name,
+  description,
+  header,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  name: string;
+  description: string;
+  header: string;
+  tx: typeof db;
+}) {
+  const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+
+  if (!isAdmin.data) {
+    log.error("403", "Forbidden");
+    return isError("Only admins can add tasks.");
+  }
+
+  try {
+    await tx
+      .update(habitTable)
+      .set({ header, name, description })
+      .where(eq(habitTable.id, habitId));
+    return isOk(null);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not update habit.");
+  }
+}
+
+async function deleteHabit({
+  userId,
+  habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<null, string>> {
+  const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+
+  if (!isAdmin.data) {
+    log.error("403", "Forbidden");
+    return isError("Only admins can delete habits.");
+  }
+
+  try {
+    tx.delete(habitTable).where(eq(habitTable.id, habitId));
+    return isOk(null);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not delete habit.");
+  }
+}
+
+async function createTask({
   userId,
   habitId,
   taskName,
@@ -159,28 +305,73 @@ async function readTaskById({
   }
 }
 
-async function updateTaskInHabit({
+async function readAllTasksByHabit({
   userId,
   habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<InferSelectModel<typeof habitTasksTable>[], string>> {
+  const isMember = await isUserMember({ userId, habitId, tx });
+
+  if (!isMember.success) {
+    return isError(isMember.error);
+  }
+
+  if (!isMember.data) {
+    log.error("403", "Forbidden");
+    return isError("You are not a member in the habit.");
+  }
+
+  try {
+    return isOk(
+      await tx
+        .select(getColumns(habitTasksTable))
+        .from(habitTasksTable)
+        .where(eq(habitTasksTable.habit, habitId)),
+    );
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not read tasks from this habit.");
+  }
+}
+
+async function updateTask({
+  userId,
   taskId,
   taskName,
   taskDescription,
   tx = db,
 }: {
   userId: string;
-  habitId: string;
   taskId: string;
   taskName: string;
   taskDescription: string;
   tx: typeof db;
 }): Promise<Result<undefined, string>> {
+  const habitForTask = await tx
+    .select({ habit: habitTasksTable.habit })
+    .from(habitTasksTable)
+    .where(eq(habitTasksTable.id, taskId));
+
+  if (habitForTask.length == 0) {
+    log.error("404", "HabitForTask failed");
+    return isError("Invalid taskId, failed to find ownership over task.");
+  }
+
+  const habitId = habitForTask[0].habit;
+
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
   if (!isAdmin.success) {
     return isError(isAdmin.error);
   }
+
   if (!isAdmin.data) {
     log.error("403", "Forbidden");
-    return isError("Only admins can add tasks.");
+    return isError("Only admins can update tasks.");
   }
 
   try {
@@ -198,10 +389,60 @@ async function updateTaskInHabit({
   }
 }
 
+async function deleteTask({
+  userId,
+  taskId,
+  tx = db,
+}: {
+  userId: string;
+  taskId: string;
+  tx: typeof db;
+}): Promise<Result<null, string>> {
+  const habitForTask = await tx
+    .select({ habit: habitTasksTable.habit })
+    .from(habitTasksTable)
+    .where(eq(habitTasksTable.id, taskId));
+
+  if (habitForTask.length == 0) {
+    log.error("404", "HabitForTask failed");
+    return isError("Invalid taskId, failed to find ownership over task.");
+  }
+
+  const habitId = habitForTask[0].habit;
+
+  const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+
+  if (!isAdmin.data) {
+    log.error("403", "Forbidden");
+    return isError("Only admins can delete tasks.");
+  }
+
+  try {
+    await tx.delete(habitTasksTable).where(eq(habitTasksTable.id, taskId));
+    return isOk(null);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not delete task.");
+  }
+}
+
 export const habitService = {
   isUserAdmin,
   isUserMember,
-  createTaskInHabit,
+
+  createHabit,
+  readHabitById,
+  readAllHabitsByUser,
+  updateHabit,
+  deleteHabit,
+
+  createTask,
   readTaskById,
-  updateTaskInHabit,
+  readAllTasksByHabit,
+  updateTask,
+  deleteTask,
 };
