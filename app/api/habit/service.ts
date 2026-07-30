@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { and, eq, getColumns, InferSelectModel, isNull } from "drizzle-orm";
+import { and, eq, getColumns, InferSelectModel } from "drizzle-orm";
 
 async function isUserAdmin({
   userId,
@@ -430,6 +430,80 @@ async function deleteTask({
   }
 }
 
+async function addMemberToHabit({
+  userId,
+  habitId,
+  memberId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  memberId: string;
+  tx: typeof db;
+}): Promise<Result<null, string>> {
+  const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+
+  if (!isAdmin.data) {
+    log.error("403", "Forbidden");
+    return isError("Only admins can add members.");
+  }
+
+  try {
+    await tx
+      .insert(habitMembersTable)
+      .values({ habit: habitId, member: memberId });
+    return isOk(null);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not add member.");
+  }
+}
+
+async function removeMemberFromHabit({
+  userId,
+  linkId,
+  tx = db,
+}: {
+  userId: string;
+  linkId: string;
+  tx: typeof db;
+}): Promise<Result<null, string>> {
+  const habitOfLink = await tx
+    .select({ habit: habitMembersTable.habit })
+    .from(habitMembersTable)
+    .where(eq(habitMembersTable.id, linkId));
+
+  if (habitOfLink.length == 0) {
+    log.error("404", "habitOfLink failed");
+    return isError("Invalid Link ID.");
+  }
+
+  const habitId = habitOfLink[0].habit;
+
+  const isAdmin = await isUserAdmin({ userId, habitId, tx });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+
+  if (!isAdmin.data) {
+    log.error("403", "Forbidden");
+    return isError("Only admins can remove members.");
+  }
+
+  try {
+    await tx.delete(habitMembersTable).where(eq(habitMembersTable.id, linkId));
+    return isOk(null);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not remove member.");
+  }
+}
+
 export const habitService = {
   isUserAdmin,
   isUserMember,
@@ -445,4 +519,7 @@ export const habitService = {
   readAllTasksByHabit,
   updateTask,
   deleteTask,
+
+  addMemberToHabit,
+  removeMemberFromHabit,
 };
