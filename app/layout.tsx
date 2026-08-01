@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-sans",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full ${geistSans.variable}`}>
-      <body className="flex min-h-svh flex-col items-center justify-center antialiased">
+      <body className="antialiased">
+        <Toaster position={"top-center"} />
         {children}
       </body>
     </html>

@@ -76,7 +76,7 @@ export const POST = withEvlog(async (request: NextRequest): Promise<NextResponse
       Body: Buffer.from(await parsedData.data.file.arrayBuffer()),
     }))
     const dbLog = await db.insert(mediaTable).values({ key: key, owner: session.user.id }).returning({ id: mediaTable.id })
-    if (!dbLog[0]) {
+    if (dbLog.length == 0) {
       throw new Error("DB log for uploaded file failed")
     }
     log.set({ id: dbLog[0].id, key: key })

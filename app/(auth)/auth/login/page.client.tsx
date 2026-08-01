@@ -3,25 +3,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { formSchema } from "./common";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import FormController from "@/components/formController";
+import { useState } from "react";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
 
 type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -43,49 +41,52 @@ export default function LoginForm() {
     }
 
     toast.success("Signed in successfully.");
-    router.push("/");
+    router.push("/dashboard");
   };
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldGroup>
-        <Controller
-          control={form.control}
+        <FormController
+          form={form}
+          label="Email"
           name="email"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                type="email"
-                autoComplete="email"
-                placeholder="jane@example.com"
-                aria-invalid={fieldState.invalid}
-              />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
+          placeholder="jane@example.com"
+          render={({ field, fieldState, placeholder }) => (
+            <Input
+              {...field}
+              id={field.name}
+              type="email"
+              autoComplete="email"
+              placeholder={placeholder}
+              aria-invalid={fieldState.invalid}
+            />
           )}
         />
-
-        <Controller
-          control={form.control}
+        <FormController
+          form={form}
+          label="Password"
           name="password"
+          placeholder=""
           render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+            <div className="flex gap-2">
               <Input
                 {...field}
                 id={field.name}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 aria-invalid={fieldState.invalid}
               />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
+              <Button
+                variant={"outline"}
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <IconEyeOff /> : <IconEye />}
+              </Button>
+            </div>
           )}
         />
-
         <Field>
           <Button type="submit" disabled={form.formState.isSubmitting}>
             Sign in
