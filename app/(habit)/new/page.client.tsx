@@ -16,6 +16,9 @@ export default function CreateHabitForm({ admin }: { admin: string }) {
     resolver: zodResolver(createHabitSchema),
     defaultValues: {
       admin,
+      header: undefined,
+      name: "",
+      description: "",
     },
   });
 
