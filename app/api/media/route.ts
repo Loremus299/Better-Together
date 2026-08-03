@@ -83,7 +83,7 @@ export const POST = withEvlog(
       file: z.file(),
     });
     const data = await request.formData();
-    const parsedData = schema.safeParse({ id: data.get("file") });
+    const parsedData = schema.safeParse({ file: data.get("file") });
     if (!parsedData.success) {
       return NextResponse.json(
         { error: z.treeifyError(parsedData.error) },
