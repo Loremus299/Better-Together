@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
@@ -11,7 +12,7 @@ async function isUserAdmin({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<boolean, string>> {
   try {
     const habitById = await tx
@@ -44,7 +45,7 @@ async function isUserMember({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<boolean, string>> {
   try {
     const isMember = await tx
@@ -84,7 +85,7 @@ async function createHabit({
   description: string;
   header?: string;
   admin: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<string, string>> {
   try {
     const habitId = await tx
@@ -106,7 +107,7 @@ async function readHabitById({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTable>, string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -134,7 +135,7 @@ async function readAllHabitsByUser({
   tx = db,
 }: {
   userId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
   try {
     return isOk(
@@ -166,7 +167,7 @@ async function updateHabit({
   name: string;
   description: string;
   header?: string;
-  tx: typeof db;
+  tx: any;
 }) {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -198,7 +199,7 @@ async function deleteHabit({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -232,7 +233,7 @@ async function createTask({
   taskName: string;
   taskDescription: string;
 
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<string, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -272,7 +273,7 @@ async function readTaskById({
   userId: string;
   habitId: string;
   taskId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTasksTable>, string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -312,7 +313,7 @@ async function readAllTasksByHabit({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTasksTable>[], string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -349,7 +350,7 @@ async function updateTask({
   taskId: string;
   taskName: string;
   taskDescription: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<undefined, string>> {
   const habitForTask = await tx
     .select({ habit: habitTasksTable.habit })
@@ -396,7 +397,7 @@ async function deleteTask({
 }: {
   userId: string;
   taskId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const habitForTask = await tx
     .select({ habit: habitTasksTable.habit })
@@ -439,7 +440,7 @@ async function addMemberToHabit({
   userId: string;
   habitId: string;
   memberId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -470,7 +471,7 @@ async function removeMemberFromHabit({
 }: {
   userId: string;
   linkId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const habitOfLink = await tx
     .select({ habit: habitMembersTable.habit })
