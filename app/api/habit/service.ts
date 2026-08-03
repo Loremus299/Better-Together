@@ -82,7 +82,7 @@ async function createHabit({
   userId: string;
   name: string;
   description: string;
-  header: string;
+  header?: string;
   admin: string;
   tx: typeof db;
 }): Promise<Result<string, string>> {
@@ -165,7 +165,7 @@ async function updateHabit({
   habitId: string;
   name: string;
   description: string;
-  header: string;
+  header?: string;
   tx: typeof db;
 }) {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
