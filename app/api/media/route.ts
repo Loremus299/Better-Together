@@ -31,7 +31,8 @@ export const GET = withEvlog(async (request: NextRequest) => {
   const schema = z.object({
     id: z.string().min(1),
   });
-  const parsedData = schema.safeParse(await request.formData());
+  const data = await request.formData();
+  const parsedData = schema.safeParse({ id: data.get("id") });
   if (!parsedData.success) {
     return NextResponse.json(
       { error: z.treeifyError(parsedData.error) },
@@ -81,7 +82,8 @@ export const POST = withEvlog(
     const schema = z.object({
       file: z.file(),
     });
-    const parsedData = schema.safeParse(await request.formData());
+    const data = await request.formData();
+    const parsedData = schema.safeParse({ id: data.get("file") });
     if (!parsedData.success) {
       return NextResponse.json(
         { error: z.treeifyError(parsedData.error) },
@@ -140,7 +142,8 @@ export const DELETE = withEvlog(
     const schema = z.object({
       id: z.string().min(1),
     });
-    const parsedData = schema.safeParse(await request.formData());
+    const data = await request.formData();
+    const parsedData = schema.safeParse({ id: data.get("id") });
     if (!parsedData.success) {
       return NextResponse.json(
         { error: z.treeifyError(parsedData.error) },
