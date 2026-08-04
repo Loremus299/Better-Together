@@ -44,12 +44,7 @@ export const GET = withEvlog(async (request: NextRequest) => {
   const key = await db
     .select({ key: mediaTable.key })
     .from(mediaTable)
-    .where(
-      and(
-        eq(mediaTable.id, parsedData.data.id),
-        eq(mediaTable.owner, session.user.id),
-      ),
-    );
+    .where(eq(mediaTable.id, parsedData.data.id));
   if (!key[0]) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }

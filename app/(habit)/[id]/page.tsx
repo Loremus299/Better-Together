@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { userId } from "@/lib/server-util";
 
 import { redirect } from "next/navigation";
-import SettingsDropdown from "./settingsDropdown";
+import SettingsDropdown from "./components/settingsDropdown";
 
 export default async function Page({
   params,
@@ -53,7 +53,9 @@ export default async function Page({
             <h1 className="text-4xl tracking-tight font-bold">
               {habit.data.name}
             </h1>
-            {isAdmin.data && <SettingsDropdown />}
+            {isAdmin.data && (
+              <SettingsDropdown userId={uid.data} habitId={id} />
+            )}
           </div>
           <h2 className="text-muted-foreground">{habit.data.description}</h2>
         </div>
