@@ -4,6 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import HabitDisplay from "./components/habitDisplay";
 
 export default function Page() {
   return (
@@ -44,9 +45,7 @@ export default function Page() {
                 defaultSize={"70%"}
                 className="hover:border hover:border-chart-2"
               >
-                <div className="h-full w-full grid place-items-center">
-                  Habits
-                </div>
+                <HabitDisplay />
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel>

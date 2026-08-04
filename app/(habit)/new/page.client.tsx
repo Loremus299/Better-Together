@@ -53,16 +53,16 @@ export default function CreateHabitForm({ admin }: { admin: string }) {
   };
 
   return (
-    <form className="grid gap-2" onSubmit={form.handleSubmit(onSubmit)}>
+    <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
       <FormController
         form={form}
-        label="Header Image"
+        label="Header Image (16:9 encouraged)"
         name="header"
         placeholder=""
         render={({ field, fieldState }) => (
           <Input
             type="file"
-            accept="image/jpeg,image/png"
+            accept="image/jpeg,image/png,image/gif"
             aria-invalid={fieldState.invalid}
             id={field.name}
             onChange={(e) => {

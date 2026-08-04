@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { and, eq, getColumns, InferSelectModel } from "drizzle-orm";
+import { and, eq, getColumns, InferSelectModel, or } from "drizzle-orm";
 
 async function isUserAdmin({
   userId,
@@ -139,13 +139,15 @@ async function readAllHabitsByUser({
   try {
     return isOk(
       await tx
-        .select(getColumns(habitTable))
+        .selectDistinct(getColumns(habitTable))
         .from(habitTable)
-        .innerJoin(
-          habitMembersTable,
-          eq(habitMembersTable.habit, habitTable.id),
-        )
-        .where(eq(habitMembersTable.member, userId)),
+        .leftJoin(habitMembersTable, eq(habitMembersTable.habit, habitTable.id))
+        .where(
+          or(
+            eq(habitMembersTable.member, userId),
+            eq(habitTable.admin, userId),
+          ),
+        ),
     );
   } catch (error) {
     log.error("500", error as string);

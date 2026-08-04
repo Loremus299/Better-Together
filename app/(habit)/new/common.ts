@@ -5,7 +5,9 @@ export const createHabitSchema = z.object({
   description: z.string().min(1),
   header: z
     .file()
-    .refine((item) => ["image/jpeg", "image/png"].includes(item.type)),
+    .refine((item) =>
+      ["image/jpeg", "image/png", "image/gif"].includes(item.type),
+    ),
   admin: z.string().min(1),
 });
 

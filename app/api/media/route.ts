@@ -31,7 +31,7 @@ export const GET = withEvlog(async (request: NextRequest) => {
   const schema = z.object({
     id: z.string().min(1),
   });
-  const data = await request.formData();
+  const data = request.nextUrl.searchParams;
   const parsedData = schema.safeParse({ id: data.get("id") });
   if (!parsedData.success) {
     return NextResponse.json(
@@ -80,7 +80,11 @@ export const POST = withEvlog(
     log.set({ user: session.user.id });
 
     const schema = z.object({
-      file: z.file(),
+      file: z
+        .file()
+        .refine((item) =>
+          ["image/png", "image/jpeg", "image/gif"].includes(item.type),
+        ),
     });
     const data = await request.formData();
     const parsedData = schema.safeParse({ file: data.get("file") });
