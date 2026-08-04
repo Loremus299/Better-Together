@@ -49,14 +49,19 @@ async function isUserMember({
 }): Promise<Result<boolean, string>> {
   try {
     const isMember = await tx
-      .select()
-      .from(habitMembersTable)
+      .select({ id: habitTable.id })
+      .from(habitTable)
+      .leftJoin(habitMembersTable, eq(habitMembersTable.habit, habitTable.id))
       .where(
         and(
-          eq(habitMembersTable.habit, habitId),
-          eq(habitMembersTable.member, userId),
+          eq(habitTable.id, habitId),
+          or(
+            eq(habitTable.admin, userId),
+            eq(habitMembersTable.member, userId),
+          ),
         ),
-      );
+      )
+      .limit(1);
 
     if (isMember.length == 0) {
       log.info("status", "is not member");

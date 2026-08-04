@@ -44,25 +44,24 @@ export default async function HabitDisplay() {
 
   return (
     <div className="w-full h-full @container">
-      <div className="grid @max-[500px]:grid-cols-1 @max-[800px]:grid-cols-2 @max-[1100px]:grid-cols-3 grid-cols-4 gap-4 p-4 overflow-y-scroll">
+      <div className="columns @max-[500px]:columns-1 @max-[800px]:columns-2 @max-[1100px]:columns-3 columns-4 gap-4 p-4 overflow-y-scroll">
         {habits.data.map((item) => (
-          <Card
-            key={item.id}
-            className="hover:scale-105 hover:rotate-6 duration-300 transition hover:drop-shadow-2xl"
-          >
-            <ImageById id={item.header!} css="w-full" />
-            <CardHeader>
-              <CardTitle className="flex gap-2 items-center">
-                {item.admin === id.data ? (
-                  <IconCrownFilled className="size-4 text-chart-3" />
-                ) : (
-                  ""
-                )}
-                {item.name}
-              </CardTitle>
-              <CardDescription>{item.description}</CardDescription>
-            </CardHeader>
-          </Card>
+          <Link href={`/${item.id}`} key={item.id} className="h-max">
+            <Card className="hover:scale-105 hover:rotate-6 duration-300 transition hover:drop-shadow-2xl mb-4 break-inside-avoid">
+              <ImageById id={item.header!} css="w-full" />
+              <CardHeader>
+                <CardTitle className="flex gap-2 items-center">
+                  {item.admin === id.data ? (
+                    <IconCrownFilled className="size-4 text-chart-3" />
+                  ) : (
+                    ""
+                  )}
+                  {item.name}
+                </CardTitle>
+                <CardDescription>{item.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>
