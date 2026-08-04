@@ -44,11 +44,11 @@ export default async function HabitDisplay() {
 
   return (
     <div className="w-full h-full @container">
-      <div className="grid @max-[500px]:grid-cols-1 @max-[800px]:grid-cols-2 @max-[1200px]:grid-cols-3 grid-cols-4 gap-4 p-4 overflow-y-scroll">
+      <div className="grid @max-[500px]:grid-cols-1 @max-[800px]:grid-cols-2 @max-[1100px]:grid-cols-3 grid-cols-4 gap-4 p-4 overflow-y-scroll">
         {habits.data.map((item) => (
           <Card
             key={item.id}
-            className="hover:scale-105 hover:rotate-6 duration-300 transition"
+            className="hover:scale-105 hover:rotate-6 duration-300 transition hover:drop-shadow-2xl"
           >
             <ImageById id={item.header!} css="w-full" />
             <CardHeader>
