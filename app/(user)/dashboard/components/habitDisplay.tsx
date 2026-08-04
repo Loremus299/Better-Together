@@ -44,7 +44,7 @@ export default async function HabitDisplay() {
 
   return (
     <div className="w-full h-full @container">
-      <div className="grid @max-[400px]:grid-cols-1 @max-[600px]:grid-cols-2 grid-cols-3 gap-4 p-4 overflow-y-scroll">
+      <div className="grid @max-[500px]:grid-cols-1 @max-[800px]:grid-cols-2 @max-[1200px]:grid-cols-3 grid-cols-4 gap-4 p-4 overflow-y-scroll">
         {habits.data.map((item) => (
           <Card
             key={item.id}
