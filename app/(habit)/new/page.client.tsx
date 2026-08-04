@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { IconCheck } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { CreateHabitAction } from "./action";
+import { useRouter } from "next/navigation";
 
 export default function CreateHabitForm({ admin }: { admin: string }) {
+  const router = useRouter();
   const form = useForm<CreateHabitValues>({
     resolver: zodResolver(createHabitSchema),
     defaultValues: {
@@ -48,7 +50,8 @@ export default function CreateHabitForm({ admin }: { admin: string }) {
     if (!action.success) {
       toast.error(action.error);
     } else {
-      toast.success(action.data);
+      toast.success("Created habit successfully.");
+      router.push(`/${action.data}`);
     }
   };
 

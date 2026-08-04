@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AddMemberDialog from "./addMemberDialog";
 import { useState } from "react";
+import AddTaskDialog from "./addTaskDialog";
 export default function SettingsDropdown({
   userId,
   habitId,
@@ -27,6 +28,8 @@ export default function SettingsDropdown({
   habitId: string;
 }) {
   const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
+
   return (
     <>
       <DropdownMenu>
@@ -40,7 +43,7 @@ export default function SettingsDropdown({
             <DropdownMenuItem onClick={() => setAddMemberOpen(true)}>
               <IconMail /> Add member
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAddTaskOpen(true)}>
               <IconPlus /> Add task
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -58,11 +61,19 @@ export default function SettingsDropdown({
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <AddMemberDialog
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         userId={userId}
         habitId={habitId}
+      />
+
+      <AddTaskDialog
+        open={addTaskOpen}
+        onOpenChange={setAddTaskOpen}
+        habitId={habitId}
+        userId={userId}
       />
     </>
   );
