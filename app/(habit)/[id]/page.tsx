@@ -1,9 +1,12 @@
 import { habitService } from "@/app/api/habit/service";
 import ImageById from "@/components/imageById";
 import MaxWContainer from "@/components/maxWContainer";
+
 import { db } from "@/db";
 import { userId } from "@/lib/server-util";
+
 import { redirect } from "next/navigation";
+import SettingsDropdown from "./settingsDropdown";
 
 export default async function Page({
   params,
@@ -14,6 +17,16 @@ export default async function Page({
   const uid = await userId();
   if (!uid.success) {
     redirect("/auth/login");
+  }
+
+  const isAdmin = await habitService.isUserAdmin({
+    habitId: id,
+    tx: db,
+    userId: uid.data,
+  });
+
+  if (!isAdmin.success) {
+    redirect(`/error?e=${isAdmin.error}`);
   }
 
   const habit = await habitService.readHabitById({
@@ -36,8 +49,13 @@ export default async function Page({
       )}
       <div className="p-4">
         <div className="grid gap-1">
-          <h1 className="text-4xl">{habit.data.name}</h1>
-          <h3 className="text-muted-foreground">{habit.data.description}</h3>
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl tracking-tight font-bold">
+              {habit.data.name}
+            </h1>
+            {isAdmin.data && <SettingsDropdown />}
+          </div>
+          <h2 className="text-muted-foreground">{habit.data.description}</h2>
         </div>
       </div>
     </MaxWContainer>
