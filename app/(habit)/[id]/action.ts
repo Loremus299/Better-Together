@@ -51,3 +51,35 @@ export const addTaskAction = withEvlog(
     return isOk(null);
   },
 );
+
+export const editHabitAction = withEvlog(
+  async ({
+    userId,
+    habitId,
+    name,
+    description,
+    finalHeader,
+  }: {
+    userId: string;
+    habitId: string;
+    name: string;
+    description: string;
+    finalHeader: string | null;
+  }): Promise<Result<null, string>> => {
+    const log = useLogger();
+    const req = await habitService.updateHabit({
+      userId,
+      habitId,
+      name,
+      description,
+      header: finalHeader,
+      tx: db,
+    });
+
+    if (!req.success) {
+      log.error(req.error);
+      return isError(req.error);
+    }
+    return isOk(null);
+  },
+);

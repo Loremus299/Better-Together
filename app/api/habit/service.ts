@@ -172,9 +172,9 @@ async function updateHabit({
   habitId: string;
   name: string;
   description: string;
-  header: string;
+  header: string | null;
   tx: any;
-}) {
+}): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
   if (!isAdmin.success) {

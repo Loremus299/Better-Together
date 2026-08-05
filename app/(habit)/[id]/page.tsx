@@ -75,6 +75,9 @@ export default async function Page({
                   <HabitAdminSettings
                     habitId={habit.data.id}
                     userId={uid.data}
+                    name={habit.data.name}
+                    description={habit.data.description}
+                    oldHeader={habit.data.header}
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>

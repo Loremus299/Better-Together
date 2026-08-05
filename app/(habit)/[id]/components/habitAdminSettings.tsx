@@ -16,15 +16,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import EditDetailsDialog from "./editDetailsDialog";
 export default function HabitAdminSettings({
   userId,
   habitId,
+  name,
+  description,
+  oldHeader,
 }: {
   userId: string;
   habitId: string;
+  name: string;
+  description: string;
+  oldHeader: string | null;
 }) {
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [addTaskOpen, setAddTaskOpen] = useState(false);
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
 
   return (
     <div className="w-full h-full">
@@ -71,6 +79,7 @@ export default function HabitAdminSettings({
                   "rounded-none aspect-square border border-muted-background size-10"
                 }
                 variant={"ghost"}
+                onClick={() => setEditDetailsOpen(true)}
               >
                 <IconPencil />
               </Button>
@@ -123,6 +132,16 @@ export default function HabitAdminSettings({
         onOpenChange={setAddTaskOpen}
         habitId={habitId}
         userId={userId}
+      />
+
+      <EditDetailsDialog
+        open={editDetailsOpen}
+        onOpenChange={setEditDetailsOpen}
+        userId={userId}
+        habitId={habitId}
+        name={name}
+        description={description}
+        oldHeader={oldHeader}
       />
     </div>
   );
