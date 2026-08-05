@@ -6,7 +6,12 @@ import { db } from "@/db";
 import { userId } from "@/lib/server-util";
 
 import { redirect } from "next/navigation";
-import SettingsDropdown from "./components/settingsDropdown";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import HabitAdminSettings from "./components/habitAdminSettings";
 
 export default async function Page({
   params,
@@ -41,25 +46,60 @@ export default async function Page({
 
   return (
     <MaxWContainer>
-      {habit.data.header && (
-        <ImageById
-          id={habit.data.header}
-          css="w-full h-[50vh] object-cover drop-shadow-2xl rounded-b-xl"
-        />
-      )}
-      <div className="p-4">
-        <div className="grid gap-1">
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl tracking-tight font-bold">
-              {habit.data.name}
-            </h1>
-            {isAdmin.data && (
-              <SettingsDropdown userId={uid.data} habitId={id} />
+      <main className="border border-muted-background">
+        <ResizablePanelGroup orientation="vertical" className="min-h-screen">
+          <ResizablePanel defaultSize={"120px"}>
+            {isAdmin.data ? (
+              <ResizablePanelGroup>
+                <ResizablePanel>
+                  <div className="w-full h-full p-4 flex gap-4">
+                    {habit.data.header && (
+                      <ImageById
+                        id={habit.data.header}
+                        css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
+                      />
+                    )}
+                    <div>
+                      <h1 className="text-4xl font-bold tracking-tight">
+                        {habit.data.name}
+                      </h1>
+                      <h2 className="text-muted-foreground">
+                        {habit.data.description}
+                      </h2>
+                    </div>
+                  </div>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={"80px"}>
+                  <HabitAdminSettings
+                    habitId={habit.data.id}
+                    userId={uid.data}
+                  />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            ) : (
+              <div className="w-full h-full p-4 flex gap-4">
+                {habit.data.header && (
+                  <ImageById
+                    id={habit.data.header}
+                    css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
+                  />
+                )}
+                <div>
+                  <h1 className="text-5xl font-bold tracking-tight">
+                    {habit.data.name}
+                  </h1>
+                  <h2 className="text-muted-foreground">
+                    {habit.data.description}
+                  </h2>
+                </div>
+              </div>
             )}
-          </div>
-          <h2 className="text-muted-foreground">{habit.data.description}</h2>
-        </div>
-      </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel>Hi</ResizablePanel>
+        </ResizablePanelGroup>
+      </main>
     </MaxWContainer>
   );
 }
