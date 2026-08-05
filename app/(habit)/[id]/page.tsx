@@ -12,6 +12,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import HabitAdminSettings from "./components/habitAdminSettings";
+import TaskDisplay from "./components/taskDisplay";
 
 export default async function Page({
   params,
@@ -97,7 +98,19 @@ export default async function Page({
             )}
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel>Hi</ResizablePanel>
+          <ResizablePanel>
+            <ResizablePanelGroup>
+              <ResizablePanel defaultSize={"75%"}>
+                <TaskDisplay
+                  userId={uid.data}
+                  habitId={habit.data.id}
+                  isAdmin={isAdmin.data}
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel>Hi</ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
         </ResizablePanelGroup>
       </main>
     </MaxWContainer>
