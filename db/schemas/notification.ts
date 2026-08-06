@@ -10,7 +10,7 @@ export const notificationTable = pgTable("notification", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   title: text("title").notNull(),
-  description: text("description").notNull(),
+  body: text("body").notNull(),
   read: boolean("read").notNull().default(false),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
