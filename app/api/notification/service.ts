@@ -56,7 +56,7 @@ async function readNotificationById({
   return isOk(notif[0]);
 }
 
-async function readNotificationByUser({
+async function readNotificationsByUser({
   user,
   tx,
 }: {
@@ -136,7 +136,7 @@ async function deleteNotification({
 export const notificationService = {
   createNotification,
   readNotificationById,
-  readNotificationByUser,
+  readNotificationsByUser,
   updateNotification,
   deleteNotification,
 };
