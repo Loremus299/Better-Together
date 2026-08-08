@@ -41,16 +41,12 @@ async function readNotificationById({
   const notif = await tx
     .select()
     .from(notificationTable)
-    .where(eq(notificationTable.id, id));
+    .where(eq(notificationTable.id, id))
+    .where(eq(notificationTable.user, user));
 
-  if (notif.length) {
+  if (notif.length == 0) {
     log.error("404", "Could not find notif by id");
     return isError("Notification not found.");
-  }
-
-  if (notif[0].user == user) {
-    log.error("403", "Forbidden");
-    return isError("You don't have access to this notification.");
   }
 
   return isOk(notif[0]);
