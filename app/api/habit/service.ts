@@ -78,6 +78,41 @@ async function isUserMember({
   }
 }
 
+async function readAllMembersByHabit({
+  userId,
+  habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<{ id: string }[], string>> {
+  const isMember = await isUserMember({ tx, userId, habitId });
+
+  if (!isMember.success) {
+    return isError(isMember.error);
+  }
+  if (!isMember.data) {
+    return isError("You cannot access this habit.");
+  }
+
+  try {
+    const members = await tx
+      .select({ id: habitMembersTable.member })
+      .from(habitMembersTable)
+      .where(eq(habitMembersTable.habit, habitId));
+    const admin = await tx
+      .select({ id: habitTable.admin })
+      .from(habitTable)
+      .where(eq(habitTable.id, habitId));
+
+    return isOk([...members, ...admin]);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not read all members in this habit");
+  }
+}
+
 async function createHabit({
   name,
   description,
@@ -514,6 +549,7 @@ async function removeMemberFromHabit({
 export const habitService = {
   isUserAdmin,
   isUserMember,
+  readAllMembersByHabit,
 
   createHabit,
   readHabitById,
