@@ -5,6 +5,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import HabitDisplay from "./components/habitDisplay";
+import NotifDisplay from "./components/notifDisplay";
 
 export default function Page() {
   return (
@@ -33,7 +34,7 @@ export default function Page() {
                 className="hover:border hover:border-chart-2"
               >
                 <div className="h-full w-full grid place-items-center">
-                  Notifs
+                  <NotifDisplay />
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>

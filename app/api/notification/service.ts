@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/db";
 import { notificationTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { DB } from "@/lib/utils";
 import { eq, InferSelectModel } from "drizzle-orm";
 
 async function createNotification({
@@ -14,7 +14,7 @@ async function createNotification({
   user: string;
   title: string;
   body: string;
-  tx: DB;
+  tx: any;
 }): Promise<Result<string, string>> {
   try {
     const ids = await tx
@@ -36,7 +36,7 @@ async function readNotificationById({
 }: {
   id: string;
   user: string;
-  tx: DB;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof notificationTable>, string>> {
   const notif = await tx
     .select()
@@ -61,7 +61,7 @@ async function readNotificationsByUser({
   tx,
 }: {
   user: string;
-  tx: DB;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof notificationTable>[], string>> {
   try {
     return isOk(
@@ -89,7 +89,7 @@ async function updateNotification({
   body: string;
   read: boolean;
   user: string;
-  tx: DB;
+  tx: any;
 }): Promise<Result<null, string>> {
   const notif = await readNotificationById({ id, tx, user });
 
@@ -116,7 +116,7 @@ async function deleteNotification({
 }: {
   id: string;
   user: string;
-  tx: DB;
+  tx: any;
 }): Promise<Result<null, string>> {
   const notif = await readNotificationById({ id, tx, user });
 

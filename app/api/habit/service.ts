@@ -234,7 +234,7 @@ async function updateHabit({
       return isError("Could not send notifications to users");
     }
 
-    for (const member of members.data) {
+    for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Updated Habit",
@@ -277,7 +277,7 @@ async function deleteHabit({
       return isError("Could not send notifications to users");
     }
 
-    for (const member of members.data) {
+    for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Deleted Habit",
@@ -335,11 +335,11 @@ async function createTask({
       return isError("Could not send notifications to users");
     }
 
-    for (const member of members.data) {
+    for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Added task",
-        body: `Admin has has added task ${taskName} in habit ${habitId}`,
+        body: `Admin has has added task '${taskName}' in habit ${habitId}`,
         tx,
       });
     }
@@ -477,11 +477,11 @@ async function updateTask({
       return isError("Could not send notifications to users");
     }
 
-    for (const member of members.data) {
+    for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Updated task",
-        body: `Admin has updated task ${taskName} in ${habitId}`,
+        body: `Admin has updated task '${taskName}' in ${habitId}`,
         tx,
       });
     }
@@ -533,11 +533,11 @@ async function deleteTask({
       return isError("Could not send notifications to users");
     }
 
-    for (const member of members.data) {
+    for (const member of members.data.filter((item) => item.id !== userId)) {
       notificationService.createNotification({
         user: member.id,
         title: "Deleted task",
-        body: `Admin has deleted task ${taskId} in habit ${habitId}`,
+        body: `Admin has deleted task '${taskId}' in habit ${habitId}`,
         tx,
       });
     }
