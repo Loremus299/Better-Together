@@ -4,6 +4,7 @@ import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
 import { and, eq, getColumns, InferSelectModel, or } from "drizzle-orm";
+import { notificationService } from "../notification/service";
 
 async function isUserAdmin({
   userId,
@@ -226,6 +227,21 @@ async function updateHabit({
       .update(habitTable)
       .set({ header, name, description })
       .where(eq(habitTable.id, habitId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Updated Habit",
+        body: `Admin has updated habit ${name}`,
+        tx,
+      });
+    }
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -255,6 +271,20 @@ async function deleteHabit({
 
   try {
     tx.delete(habitTable).where(eq(habitTable.id, habitId));
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Deleted Habit",
+        body: `Admin has deleted habit ${habitId}`,
+        tx,
+      });
+    }
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -298,6 +328,22 @@ async function createTask({
       .returning({ id: habitTasksTable.id });
 
     log.info("Task Id", taskId[0].id);
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Added task",
+        body: `Admin has has added task ${taskName} in habit ${habitId}`,
+        tx,
+      });
+    }
+
     return isOk(taskId[0].id);
   } catch (error) {
     log.error("500", error as string);
@@ -424,6 +470,21 @@ async function updateTask({
         description: taskDescription,
       })
       .where(eq(habitTasksTable.id, taskId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Updated task",
+        body: `Admin has updated task ${taskName} in ${habitId}`,
+        tx,
+      });
+    }
     return isOk(undefined);
   } catch (error) {
     log.error("500", error as string);
@@ -465,6 +526,22 @@ async function deleteTask({
 
   try {
     await tx.delete(habitTasksTable).where(eq(habitTasksTable.id, taskId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data) {
+      notificationService.createNotification({
+        user: member.id,
+        title: "Deleted task",
+        body: `Admin has deleted task ${taskId} in habit ${habitId}`,
+        tx,
+      });
+    }
+
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
