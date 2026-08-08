@@ -28,7 +28,7 @@ export default async function NotifDisplay() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full h-full grid place-items-center">
-        <IconBell />
+        <IconBell stroke={1} />
         {notifs.data.filter((item) => item.read === false).length > 0 && (
           <div className="absolute">
             <div className="relative top-2 left-2">

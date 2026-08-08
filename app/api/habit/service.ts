@@ -277,11 +277,15 @@ async function deleteHabit({
       return isError("Could not send notifications to users");
     }
 
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
     for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Deleted Habit",
-        body: `Admin has deleted habit ${habitId}`,
+        body: `Admin has deleted habit ${name.data.name}`,
         tx,
       });
     }
@@ -335,11 +339,16 @@ async function createTask({
       return isError("Could not send notifications to users");
     }
 
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
     for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Added task",
-        body: `Admin has has added task '${taskName}' in habit ${habitId}`,
+        body: `Admin has has added task '${taskName}' in habit ${name.data.name}`,
         tx,
       });
     }
@@ -477,11 +486,16 @@ async function updateTask({
       return isError("Could not send notifications to users");
     }
 
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
     for (const member of members.data.filter((item) => item.id !== userId)) {
       await notificationService.createNotification({
         user: member.id,
         title: "Updated task",
-        body: `Admin has updated task '${taskName}' in ${habitId}`,
+        body: `Admin has updated task '${taskName}' in ${name.data.name}`,
         tx,
       });
     }
@@ -533,11 +547,21 @@ async function deleteTask({
       return isError("Could not send notifications to users");
     }
 
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
+    const taskName = await readTaskById({ habitId, taskId, tx, userId });
+    if (!taskName.success) {
+      return isError(taskName.error);
+    }
+
     for (const member of members.data.filter((item) => item.id !== userId)) {
       notificationService.createNotification({
         user: member.id,
         title: "Deleted task",
-        body: `Admin has deleted task '${taskId}' in habit ${habitId}`,
+        body: `Admin has deleted task '${taskName.data.task}' in habit ${name.data.name}`,
         tx,
       });
     }
