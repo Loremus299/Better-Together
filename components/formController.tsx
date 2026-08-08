@@ -8,7 +8,10 @@ import {
 } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "./ui/field";
 
-export default function FormController<T extends FieldValues>({
+export default function FormController<
+  T extends FieldValues,
+  K extends Path<T>,
+>({
   form,
   name,
   label,
@@ -16,12 +19,12 @@ export default function FormController<T extends FieldValues>({
   render,
 }: {
   form: UseFormReturn<T>;
-  name: Path<T>;
+  name: K;
   label: string;
   placeholder: string;
   render: (args: {
     fieldState: ControllerFieldState;
-    field: ControllerRenderProps<T, Path<T>>;
+    field: ControllerRenderProps<T, K>;
     placeholder: string;
   }) => React.ReactNode;
 }) {

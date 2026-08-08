@@ -9,9 +9,9 @@ export const habitTable = pgTable("habit", {
     .$defaultFn(() => createId()),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  header: text("header")
-    .references(() => mediaTable.id, { onDelete: "cascade" })
-    .notNull(),
+  header: text("header").references(() => mediaTable.id, {
+    onDelete: "cascade",
+  }),
   admin: text("admin")
     .references(() => user.id, { onDelete: "restrict" })
     .notNull(),

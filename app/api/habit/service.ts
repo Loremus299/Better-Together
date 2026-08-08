@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/db";
 import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
-import { and, eq, getColumns, InferSelectModel } from "drizzle-orm";
+import { and, eq, getColumns, InferSelectModel, or } from "drizzle-orm";
+import { notificationService } from "../notification/service";
 
 async function isUserAdmin({
   userId,
@@ -11,7 +13,7 @@ async function isUserAdmin({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<boolean, string>> {
   try {
     const habitById = await tx
@@ -44,18 +46,23 @@ async function isUserMember({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<boolean, string>> {
   try {
     const isMember = await tx
-      .select()
-      .from(habitMembersTable)
+      .select({ id: habitTable.id })
+      .from(habitTable)
+      .leftJoin(habitMembersTable, eq(habitMembersTable.habit, habitTable.id))
       .where(
         and(
-          eq(habitMembersTable.habit, habitId),
-          eq(habitMembersTable.member, userId),
+          eq(habitTable.id, habitId),
+          or(
+            eq(habitTable.admin, userId),
+            eq(habitMembersTable.member, userId),
+          ),
         ),
-      );
+      )
+      .limit(1);
 
     if (isMember.length == 0) {
       log.info("status", "is not member");
@@ -72,6 +79,41 @@ async function isUserMember({
   }
 }
 
+async function readAllMembersByHabit({
+  userId,
+  habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<{ id: string }[], string>> {
+  const isMember = await isUserMember({ tx, userId, habitId });
+
+  if (!isMember.success) {
+    return isError(isMember.error);
+  }
+  if (!isMember.data) {
+    return isError("You cannot access this habit.");
+  }
+
+  try {
+    const members = await tx
+      .select({ id: habitMembersTable.member })
+      .from(habitMembersTable)
+      .where(eq(habitMembersTable.habit, habitId));
+    const admin = await tx
+      .select({ id: habitTable.admin })
+      .from(habitTable)
+      .where(eq(habitTable.id, habitId));
+
+    return isOk([...members, ...admin]);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not read all members in this habit");
+  }
+}
+
 async function createHabit({
   name,
   description,
@@ -79,12 +121,11 @@ async function createHabit({
   admin,
   tx = db,
 }: {
-  userId: string;
   name: string;
   description: string;
   header: string;
   admin: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<string, string>> {
   try {
     const habitId = await tx
@@ -106,7 +147,7 @@ async function readHabitById({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTable>, string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -134,18 +175,20 @@ async function readAllHabitsByUser({
   tx = db,
 }: {
   userId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
   try {
     return isOk(
       await tx
-        .select(getColumns(habitTable))
+        .selectDistinct(getColumns(habitTable))
         .from(habitTable)
-        .innerJoin(
-          habitMembersTable,
-          eq(habitMembersTable.habit, habitTable.id),
-        )
-        .where(eq(habitMembersTable.member, userId)),
+        .leftJoin(habitMembersTable, eq(habitMembersTable.habit, habitTable.id))
+        .where(
+          or(
+            eq(habitMembersTable.member, userId),
+            eq(habitTable.admin, userId),
+          ),
+        ),
     );
   } catch (error) {
     log.error("500", error as string);
@@ -165,9 +208,9 @@ async function updateHabit({
   habitId: string;
   name: string;
   description: string;
-  header: string;
-  tx: typeof db;
-}) {
+  header: string | null;
+  tx: any;
+}): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
   if (!isAdmin.success) {
@@ -184,6 +227,21 @@ async function updateHabit({
       .update(habitTable)
       .set({ header, name, description })
       .where(eq(habitTable.id, habitId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    for (const member of members.data.filter((item) => item.id !== userId)) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Updated Habit",
+        body: `Admin has updated habit '${name}'`,
+        tx,
+      });
+    }
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -198,7 +256,7 @@ async function deleteHabit({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -213,6 +271,24 @@ async function deleteHabit({
 
   try {
     tx.delete(habitTable).where(eq(habitTable.id, habitId));
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+    for (const member of members.data.filter((item) => item.id !== userId)) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Deleted Habit",
+        body: `Admin has deleted habit '${name.data.name}'`,
+        tx,
+      });
+    }
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -232,7 +308,7 @@ async function createTask({
   taskName: string;
   taskDescription: string;
 
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<string, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -256,6 +332,27 @@ async function createTask({
       .returning({ id: habitTasksTable.id });
 
     log.info("Task Id", taskId[0].id);
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
+    for (const member of members.data.filter((item) => item.id !== userId)) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Added task",
+        body: `Admin has has added task '${taskName}' in habit '${name.data.name}'`,
+        tx,
+      });
+    }
+
     return isOk(taskId[0].id);
   } catch (error) {
     log.error("500", error as string);
@@ -272,7 +369,7 @@ async function readTaskById({
   userId: string;
   habitId: string;
   taskId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTasksTable>, string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -312,7 +409,7 @@ async function readAllTasksByHabit({
 }: {
   userId: string;
   habitId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<InferSelectModel<typeof habitTasksTable>[], string>> {
   const isMember = await isUserMember({ userId, habitId, tx });
 
@@ -349,7 +446,7 @@ async function updateTask({
   taskId: string;
   taskName: string;
   taskDescription: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<undefined, string>> {
   const habitForTask = await tx
     .select({ habit: habitTasksTable.habit })
@@ -382,6 +479,26 @@ async function updateTask({
         description: taskDescription,
       })
       .where(eq(habitTasksTable.id, taskId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
+    for (const member of members.data.filter((item) => item.id !== userId)) {
+      await notificationService.createNotification({
+        user: member.id,
+        title: "Updated task",
+        body: `Admin has updated task '${taskName}' in '${name.data.name}'`,
+        tx,
+      });
+    }
     return isOk(undefined);
   } catch (error) {
     log.error("500", error as string);
@@ -396,7 +513,7 @@ async function deleteTask({
 }: {
   userId: string;
   taskId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const habitForTask = await tx
     .select({ habit: habitTasksTable.habit })
@@ -423,6 +540,32 @@ async function deleteTask({
 
   try {
     await tx.delete(habitTasksTable).where(eq(habitTasksTable.id, taskId));
+
+    const members = await readAllMembersByHabit({ habitId, tx, userId });
+    if (!members.success) {
+      log.warn("500", members.error);
+      return isError("Could not send notifications to users");
+    }
+
+    const name = await readHabitById({ habitId, tx, userId });
+    if (!name.success) {
+      return isError(name.error);
+    }
+
+    const taskName = await readTaskById({ habitId, taskId, tx, userId });
+    if (!taskName.success) {
+      return isError(taskName.error);
+    }
+
+    for (const member of members.data.filter((item) => item.id !== userId)) {
+      notificationService.createNotification({
+        user: member.id,
+        title: "Deleted task",
+        body: `Admin has deleted task '${taskName.data.task}' in habit '${name.data.name}'`,
+        tx,
+      });
+    }
+
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -439,7 +582,7 @@ async function addMemberToHabit({
   userId: string;
   habitId: string;
   memberId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -470,7 +613,7 @@ async function removeMemberFromHabit({
 }: {
   userId: string;
   linkId: string;
-  tx: typeof db;
+  tx: any;
 }): Promise<Result<null, string>> {
   const habitOfLink = await tx
     .select({ habit: habitMembersTable.habit })
@@ -507,6 +650,7 @@ async function removeMemberFromHabit({
 export const habitService = {
   isUserAdmin,
   isUserMember,
+  readAllMembersByHabit,
 
   createHabit,
   readHabitById,
