@@ -8,8 +8,8 @@ import { notificationService } from "@/app/api/notification/service";
 import { db } from "@/db";
 import { userId } from "@/lib/server-util";
 import { redirect } from "next/navigation";
-import { IconBell, IconCircleFilled, IconEye } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+import { IconBell, IconCircleFilled } from "@tabler/icons-react";
+import NotifMarkButton from "./notifMarkButton";
 
 export default async function NotifDisplay() {
   const user = await userId();
@@ -39,15 +39,11 @@ export default async function NotifDisplay() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="max-w-sm w-full">
         <DropdownMenuGroup>
-          {notifs.data.map((item) => (
+          {notifs.data.reverse().map((item) => (
             <div className="p-2 font-medium" key={item.id}>
               <div className="flex items-center justify-between">
                 <p className="text-sm">{item.title}</p>
-                {!item.read && (
-                  <Button size={"xs"} variant={"ghost"}>
-                    <IconEye />
-                  </Button>
-                )}
+                {!item.read && <NotifMarkButton id={item.id} />}
               </div>
               <p className="text-sm font-normal text-muted-foreground">
                 {item.body}

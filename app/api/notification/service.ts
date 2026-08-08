@@ -48,7 +48,7 @@ async function readNotificationById({
     return isError("Notification not found.");
   }
 
-  if ((notif[0].user = user)) {
+  if (notif[0].user == user) {
     log.error("403", "Forbidden");
     return isError("You don't have access to this notification.");
   }
@@ -76,18 +76,12 @@ async function readNotificationsByUser({
   }
 }
 
-async function updateNotification({
+async function updateNotificationAsRead({
   id,
-  title,
-  body,
-  read,
   user,
   tx,
 }: {
   id: string;
-  title: string;
-  body: string;
-  read: boolean;
   user: string;
   tx: any;
 }): Promise<Result<null, string>> {
@@ -100,7 +94,7 @@ async function updateNotification({
   try {
     await tx
       .update(notificationTable)
-      .set({ read, title, body })
+      .set({ read: true })
       .where(eq(notificationTable.id, id));
     return isOk(null);
   } catch (error) {
@@ -137,6 +131,6 @@ export const notificationService = {
   createNotification,
   readNotificationById,
   readNotificationsByUser,
-  updateNotification,
+  updateNotificationAsRead,
   deleteNotification,
 };
