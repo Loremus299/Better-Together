@@ -238,7 +238,7 @@ async function updateHabit({
       await notificationService.createNotification({
         user: member.id,
         title: "Updated Habit",
-        body: `Admin has updated habit ${name}`,
+        body: `Admin has updated habit '${name}'`,
         tx,
       });
     }
@@ -285,7 +285,7 @@ async function deleteHabit({
       await notificationService.createNotification({
         user: member.id,
         title: "Deleted Habit",
-        body: `Admin has deleted habit ${name.data.name}`,
+        body: `Admin has deleted habit '${name.data.name}'`,
         tx,
       });
     }
@@ -348,7 +348,7 @@ async function createTask({
       await notificationService.createNotification({
         user: member.id,
         title: "Added task",
-        body: `Admin has has added task '${taskName}' in habit ${name.data.name}`,
+        body: `Admin has has added task '${taskName}' in habit '${name.data.name}'`,
         tx,
       });
     }
@@ -495,7 +495,7 @@ async function updateTask({
       await notificationService.createNotification({
         user: member.id,
         title: "Updated task",
-        body: `Admin has updated task '${taskName}' in ${name.data.name}`,
+        body: `Admin has updated task '${taskName}' in '${name.data.name}'`,
         tx,
       });
     }
@@ -561,7 +561,7 @@ async function deleteTask({
       notificationService.createNotification({
         user: member.id,
         title: "Deleted task",
-        body: `Admin has deleted task '${taskName.data.task}' in habit ${name.data.name}`,
+        body: `Admin has deleted task '${taskName.data.task}' in habit '${name.data.name}'`,
         tx,
       });
     }
