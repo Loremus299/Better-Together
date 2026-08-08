@@ -10,6 +10,7 @@ import { userId } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import { IconBell, IconCircleFilled } from "@tabler/icons-react";
 import NotifMarkButton from "./notifMarkButton";
+import { cn } from "@/lib/utils";
 
 export default async function NotifDisplay() {
   const user = await userId();
@@ -42,7 +43,14 @@ export default async function NotifDisplay() {
           {notifs.data.reverse().map((item) => (
             <div className="p-2 font-medium" key={item.id}>
               <div className="flex items-center justify-between">
-                <p className="text-sm">{item.title}</p>
+                <p
+                  className={cn(
+                    "text-sm",
+                    item.read ? "line-through text-muted-foreground" : "",
+                  )}
+                >
+                  {item.title}
+                </p>
                 {!item.read && <NotifMarkButton id={item.id} />}
               </div>
               <p className="text-sm font-normal text-muted-foreground">
