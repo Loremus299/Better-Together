@@ -31,3 +31,9 @@ export const editDetailsSchema = z.object({
 });
 
 export type EditDetailsValues = z.infer<typeof editDetailsSchema>;
+
+export const removeMemberSchema = z.object({
+  habitId: z.string().min(1),
+});
+
+export type RemoveMemberValues = z.infer<typeof removeMemberSchema>;

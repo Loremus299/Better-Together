@@ -17,22 +17,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import EditDetailsDialog from "./editDetailsDialog";
+import RemoveMemberDialog from "./removeMemberDialog";
 export default function HabitAdminSettings({
   userId,
   habitId,
   name,
   description,
   oldHeader,
+  members,
 }: {
   userId: string;
   habitId: string;
   name: string;
   description: string;
   oldHeader: string | null;
+  members: { id: string; email: string }[];
 }) {
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+  const [removeMembersOpen, setRemoveMemberOpen] = useState(false);
 
   return (
     <div className="w-full h-full">
@@ -96,6 +100,7 @@ export default function HabitAdminSettings({
                   "rounded-none aspect-square border border-muted-background size-10"
                 }
                 variant={"ghost"}
+                onClick={() => setRemoveMemberOpen(true)}
               >
                 <IconUserCancel className="text-destructive" />
               </Button>
@@ -142,6 +147,12 @@ export default function HabitAdminSettings({
         name={name}
         description={description}
         oldHeader={oldHeader}
+      />
+
+      <RemoveMemberDialog
+        open={removeMembersOpen}
+        onOpenChange={setRemoveMemberOpen}
+        members={members}
       />
     </div>
   );
