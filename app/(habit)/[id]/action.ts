@@ -107,7 +107,7 @@ export const removeMemberAction = withEvlog(
 );
 
 export const deleteHabitAction = withEvlog(
-  async ({ habitId }: { habitId: string }) => {
+  async ({ habitId }: { habitId: string }): Promise<Result<null, string>> => {
     const log = useLogger();
     const user = await userId();
     if (!user.success) {

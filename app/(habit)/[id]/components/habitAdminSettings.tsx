@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import EditDetailsDialog from "./editDetailsDialog";
 import RemoveMemberDialog from "./removeMemberDialog";
+import DeleteHabitAlert from "./deleteHabitAlert";
 export default function HabitAdminSettings({
   userId,
   habitId,
@@ -37,6 +38,7 @@ export default function HabitAdminSettings({
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);
   const [removeMembersOpen, setRemoveMemberOpen] = useState(false);
+  const [deleteHabitOpen, setDeleteHabitOpen] = useState(false);
 
   return (
     <div className="w-full h-full">
@@ -117,6 +119,7 @@ export default function HabitAdminSettings({
                   "rounded-none aspect-square border border-muted-background size-10"
                 }
                 variant={"ghost"}
+                onClick={() => setDeleteHabitOpen(true)}
               >
                 <IconTrash className="text-destructive" />
               </Button>
@@ -153,6 +156,12 @@ export default function HabitAdminSettings({
         open={removeMembersOpen}
         onOpenChange={setRemoveMemberOpen}
         members={members}
+      />
+
+      <DeleteHabitAlert
+        open={deleteHabitOpen}
+        onOpenChange={setDeleteHabitOpen}
+        habitId={habitId}
       />
     </div>
   );
