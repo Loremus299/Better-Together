@@ -301,7 +301,6 @@ async function deleteHabit({
   }
 
   try {
-    tx.delete(habitTable).where(eq(habitTable.id, habitId));
     const members = await readAllMembersByHabit({ habitId, tx, userId });
     if (!members.success) {
       log.warn("500", members.error);
@@ -319,6 +318,8 @@ async function deleteHabit({
         body: `Admin has deleted habit '${name.data.name}'`,
         tx,
       });
+
+      await tx.delete(habitTable).where(eq(habitTable.id, habitId));
     }
     return isOk(null);
   } catch (error) {
