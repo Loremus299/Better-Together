@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/db";
-import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
+import {
+  habitMembersTable,
+  habitTable,
+  habitTasksTable,
+  user,
+} from "@/db/schema";
 import { log } from "@/lib/evlog";
 import { isError, isOk, Result } from "@/lib/result";
 import { and, eq, getColumns, InferSelectModel, or } from "drizzle-orm";
@@ -108,6 +113,38 @@ async function readAllMembersByHabit({
       .where(eq(habitTable.id, habitId));
 
     return isOk([...members, ...admin]);
+  } catch (error) {
+    log.error("500", error as string);
+    return isError("Could not read all members in this habit");
+  }
+}
+
+async function readAllHabitLinks({
+  userId,
+  habitId,
+  tx = db,
+}: {
+  userId: string;
+  habitId: string;
+  tx: typeof db;
+}): Promise<Result<{ id: string; email: string }[], string>> {
+  const isAdmin = await isUserAdmin({ tx, userId, habitId });
+
+  if (!isAdmin.success) {
+    return isError(isAdmin.error);
+  }
+  if (!isAdmin.data) {
+    return isError("You cannot access this habit.");
+  }
+
+  try {
+    return isOk(
+      await tx
+        .select({ id: habitMembersTable.id, email: user.email })
+        .from(habitMembersTable)
+        .where(eq(habitMembersTable.habit, habitId))
+        .innerJoin(user, eq(habitMembersTable.member, user.id)),
+    );
   } catch (error) {
     log.error("500", error as string);
     return isError("Could not read all members in this habit");
@@ -270,7 +307,6 @@ async function deleteHabit({
   }
 
   try {
-    tx.delete(habitTable).where(eq(habitTable.id, habitId));
     const members = await readAllMembersByHabit({ habitId, tx, userId });
     if (!members.success) {
       log.warn("500", members.error);
@@ -289,6 +325,8 @@ async function deleteHabit({
         tx,
       });
     }
+
+    await tx.delete(habitTable).where(eq(habitTable.id, habitId));
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -596,6 +634,21 @@ async function addMemberToHabit({
   }
 
   try {
+    const existing = await tx
+      .select({ id: habitMembersTable.id })
+      .from(habitMembersTable)
+      .where(
+        and(
+          eq(habitMembersTable.habit, habitId),
+          eq(habitMembersTable.member, memberId),
+        ),
+      );
+
+    if (existing.length > 0) {
+      log.info("status", "member already exists");
+      return isError("User is already a member of this habit.");
+    }
+
     await tx
       .insert(habitMembersTable)
       .values({ habit: habitId, member: memberId });
@@ -616,7 +669,10 @@ async function removeMemberFromHabit({
   tx: any;
 }): Promise<Result<null, string>> {
   const habitOfLink = await tx
-    .select({ habit: habitMembersTable.habit })
+    .select({
+      habit: habitMembersTable.habit,
+      member: habitMembersTable.member,
+    })
     .from(habitMembersTable)
     .where(eq(habitMembersTable.id, linkId));
 
@@ -626,6 +682,7 @@ async function removeMemberFromHabit({
   }
 
   const habitId = habitOfLink[0].habit;
+  const memberId = habitOfLink[0].member;
 
   const isAdmin = await isUserAdmin({ userId, habitId, tx });
 
@@ -639,7 +696,14 @@ async function removeMemberFromHabit({
   }
 
   try {
-    await tx.delete(habitMembersTable).where(eq(habitMembersTable.id, linkId));
+    await tx
+      .delete(habitMembersTable)
+      .where(
+        and(
+          eq(habitMembersTable.habit, habitId),
+          eq(habitMembersTable.member, memberId),
+        ),
+      );
     return isOk(null);
   } catch (error) {
     log.error("500", error as string);
@@ -665,5 +729,6 @@ export const habitService = {
   deleteTask,
 
   addMemberToHabit,
+  readAllHabitLinks,
   removeMemberFromHabit,
 };

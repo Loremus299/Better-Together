@@ -45,6 +45,14 @@ export default async function Page({
     redirect(`/error?e=${habit.error}`);
   }
 
+  const members = await habitService.readAllHabitLinks({
+    userId: uid.data,
+    tx: db,
+    habitId: id,
+  });
+
+  if (!members.success) redirect(`/error?e=${members.error}`);
+
   return (
     <MaxWContainer>
       <main className="border border-muted-background">
@@ -78,6 +86,7 @@ export default async function Page({
                     name={habit.data.name}
                     description={habit.data.description}
                     oldHeader={habit.data.header}
+                    members={members.data}
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>
