@@ -105,4 +105,8 @@ export class Logger {
     }
     console.log("\n");
   }
+
+  public getId() {
+    return this.context[0].key;
+  }
 }
