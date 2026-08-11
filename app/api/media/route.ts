@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+    log.info({ user: session.user.id });
 
     const schema = z.object({
       file: z
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
+    log.info({ key: s3op.value.data });
 
     const drizzleOp = await drizzleService.insert(
       mediaTable,
@@ -69,7 +71,6 @@ export async function POST(req: NextRequest) {
       db,
       log,
     );
-
     if (!drizzleOp.value.success) {
       const s3op2 = await s3Ops.deleteEntry(s3op.value.data, log);
       s3op2.mapError(async (e) => log.error({ s3Error: e }));
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
         },
       );
     }
+    log.debug({ ...drizzleOp.value.data });
 
     return NextResponse.json(
       { key: s3op.value.data, request: log.getId() },

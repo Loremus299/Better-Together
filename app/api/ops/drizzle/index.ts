@@ -43,7 +43,33 @@ async function readAllWithCondition<T extends AnyPgTable>(
     return Result.ok(data);
   } catch (error) {
     log.error({ dbError: error as string });
-    return Result.error("Could not delete from table");
+    return Result.error("Could not read from table");
+  }
+}
+
+async function readWithCondition<T extends AnyPgTable>(
+  table: AnyPgTable,
+  condition: (
+    t: AnyPgTable,
+  ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
+  tx: DB,
+  log: Logger,
+): Promise<Result<InferSelectModel<T>, string>> {
+  log.trace({ layer: "drizzle ops service" });
+  try {
+    const data = (await tx
+      .select()
+      .from(table)
+      .where(condition(table))) as InferSelectModel<T>[];
+
+    if (data.length !== 0) {
+      return Result.ok(data[0]);
+    } else {
+      return Result.error("Could not select");
+    }
+  } catch (error) {
+    log.error({ dbError: error as string });
+    return Result.error("Could not read from table");
   }
 }
 
@@ -67,4 +93,5 @@ export const drizzleService = {
   insert,
   remove,
   readAllWithCondition,
+  readWithCondition,
 };
