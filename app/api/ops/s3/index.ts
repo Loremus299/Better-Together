@@ -2,8 +2,13 @@ import { env } from "@/env";
 import { Logger } from "@/lib/logger";
 import { Result } from "@/lib/result";
 import { s3 } from "@/lib/s3";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { createId } from "@paralleldrive/cuid2";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 async function createEntry({
   file,
@@ -32,6 +37,27 @@ async function createEntry({
   }
 }
 
+async function readEntry(
+  key: string,
+  log: Logger,
+): Promise<Result<string, string>> {
+  log.trace({ layer: "ops s3 service" });
+  try {
+    const url = await getSignedUrl(
+      s3,
+      new GetObjectCommand({
+        Bucket: env.S3_BUCKET,
+        Key: key,
+      }),
+      { expiresIn: 3600 },
+    );
+    return Result.ok(url);
+  } catch (error) {
+    log.error({ s3Error: error as string });
+    return Result.error("Failed to read file in s3");
+  }
+}
+
 async function deleteEntry(
   key: string,
   log: Logger,
@@ -53,5 +79,6 @@ async function deleteEntry(
 
 export const s3Ops = {
   createEntry,
+  readEntry,
   deleteEntry,
 };
