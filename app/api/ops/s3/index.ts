@@ -42,6 +42,7 @@ async function readEntry(
   log: Logger,
 ): Promise<Result<string, string>> {
   log.trace({ layer: "ops s3 service" });
+  log.debug({ key });
   try {
     const url = await getSignedUrl(
       s3,
