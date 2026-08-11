@@ -1,12 +1,3 @@
-import { userId } from "@/lib/server-util";
-import { redirect } from "next/navigation";
-
 export default async function Home() {
-  const id = await userId();
-
-  if (!id.success) {
-    redirect("/auth/login");
-  }
-
-  redirect("/dashboard");
+  return <div>Hi</div>;
 }
