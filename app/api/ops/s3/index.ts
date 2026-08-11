@@ -2,7 +2,6 @@ import { env } from "@/env";
 import { Logger } from "@/lib/logger";
 import { Result } from "@/lib/result";
 import { s3 } from "@/lib/s3";
-import { DB } from "@/lib/utils";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -37,6 +36,7 @@ async function deleteEntry(
   key: string,
   log: Logger,
 ): Promise<Result<undefined, string>> {
+  log.trace({ layer: "ops s3 service" });
   try {
     await s3.send(
       new DeleteObjectCommand({
