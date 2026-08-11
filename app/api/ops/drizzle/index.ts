@@ -73,6 +73,24 @@ async function readWithCondition<T extends AnyPgTable>(
   }
 }
 
+async function update<T extends AnyPgTable>(
+  table: AnyPgTable,
+  data: Partial<InferInsertModel<T>>,
+  condition: (
+    t: AnyPgTable,
+  ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
+  tx: DB,
+  log: Logger,
+) {
+  log.trace({ layer: "drizzle ops service" });
+  try {
+    await tx.update(table).set(data).where(condition(table));
+  } catch (error) {
+    log.error({ dbError: error as string });
+    return Result.error("Could not update table");
+  }
+}
+
 async function remove(
   table: AnyPgTable,
   condition: (t: AnyPgTable) => SQL | ReturnType<typeof and>,
@@ -91,7 +109,8 @@ async function remove(
 
 export const drizzleService = {
   insert,
-  remove,
   readAllWithCondition,
   readWithCondition,
+  update,
+  remove,
 };
