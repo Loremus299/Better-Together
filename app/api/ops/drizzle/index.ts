@@ -84,6 +84,7 @@ async function update<T extends AnyPgTable>(
 ) {
   log.trace({ layer: "drizzle ops service" });
   try {
+    log.debug(data);
     await tx.update(table).set(data).where(condition(table));
   } catch (error) {
     log.error({ dbError: error as string });

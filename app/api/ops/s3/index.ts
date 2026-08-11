@@ -64,6 +64,7 @@ async function deleteEntry(
   log: Logger,
 ): Promise<Result<undefined, string>> {
   log.trace({ layer: "ops s3 service" });
+  log.debug({ key });
   try {
     await s3.send(
       new DeleteObjectCommand({

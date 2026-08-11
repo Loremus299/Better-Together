@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     });
     const data = await req.formData();
     const file = data.get("file") as File;
-    log.info({ name: file.name, size: file.size, type: file.type });
+    log.debug({ name: file.name, size: file.size, type: file.type });
     const parsedData = schema.safeParse({ file });
 
     if (!parsedData.success) {
