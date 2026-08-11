@@ -1,4 +1,3 @@
-import { db } from "@/db";
 import { Logger } from "@/lib/logger";
 import { Result } from "@/lib/result";
 import { DB } from "@/lib/utils";
