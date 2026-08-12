@@ -9,7 +9,11 @@ export default async function RegisterPage({
   return (
     <div className="w-full min-h-screen grid place-items-center">
       <div className="w-full max-w-sm">
-        <RegisterForm name={sp.name} email={sp.email} password={sp.password} />
+        <RegisterForm
+          name={sp.name ?? ""}
+          email={sp.email ?? ""}
+          password={sp.password ?? ""}
+        />
       </div>
     </div>
   );
