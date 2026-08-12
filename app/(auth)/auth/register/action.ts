@@ -10,7 +10,7 @@ export async function signUpNotification({
 }: {
   id: string;
   name: string;
-}): Promise<Result<undefined, string>> {
+}): Promise<Result<"", string>> {
   const log = new Logger();
   log.trace({ layer: "Sign Up Notification Action" });
 
@@ -23,7 +23,7 @@ export async function signUpNotification({
     });
 
     if (!notif.value.success) return Result.error(notif.value.error);
-    return Result.ok(undefined);
+    return Result.ok("");
   } finally {
     log.print();
   }
