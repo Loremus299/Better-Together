@@ -69,7 +69,36 @@ async function del({
   return Result.ok(undefined);
 }
 
+async function readByUser({
+  user,
+  log,
+}: {
+  user: string;
+  log: Logger;
+}): Promise<Result<string[], string>> {
+  log.debug({ layer: "media service" });
+
+  const ids = await drizzleService.readAllWithCondition(
+    mediaTable,
+    (mediaTable) => eq(mediaTable.owner, user),
+    db,
+    log,
+  );
+
+  if (!ids.value.success) return Result.error(ids.value.error);
+
+  const urls: string[] = [];
+  for (const id of ids.value.data) {
+    const url = await s3Ops.readEntry(id.key, log);
+    if (!url.value.success) return Result.error(url.value.error);
+    urls.push(url.value.data);
+  }
+
+  return Result.ok(urls);
+}
+
 export const mediaService = {
   read,
   del,
+  readByUser,
 };
