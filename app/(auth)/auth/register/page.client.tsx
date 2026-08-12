@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import FormController from "@/components/formController";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import { signUpNotification } from "./action";
 
 export const formSchema = z.object({
   name: z.string().min(1),
@@ -44,18 +45,26 @@ export default function RegisterForm({
   });
 
   const onSubmit = async (values: FormValues) => {
-    const { error } = await authClient.signUp.email({
+    const act = await authClient.signUp.email({
       name: values.name,
       email: values.email,
       password: values.password,
     });
 
-    if (error) {
-      toast.error(error.message ?? "Something went wrong. Please try again.");
+    if (act.error) {
+      toast.error(
+        act.error.message ?? "Something went wrong. Please try again.",
+      );
       return;
     }
 
     toast.success("Account created successfully.");
+    (
+      await signUpNotification({
+        id: act.data.user.id,
+        name: act.data.user.name,
+      })
+    ).mapError((e) => toast.error(e));
     router.push("/dashboard");
   };
 
