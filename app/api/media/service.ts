@@ -30,6 +30,46 @@ async function read({
   return Result.ok(url.value.data);
 }
 
+async function del({
+  user,
+  id,
+  log,
+}: {
+  user: string;
+  id: string;
+  log: Logger;
+}): Promise<Result<undefined, string>> {
+  log.trace({ layer: "media service" });
+  const key = await drizzleService.readWithCondition(
+    mediaTable,
+    (mediaTable) => eq(mediaTable.id, id),
+    db,
+    log,
+  );
+  if (!key.value.success) return Result.error(key.value.error);
+  log.info({ selectedIdData: key });
+
+  if (key.value.data.owner !== user) {
+    log.error({ accessError: "User cannot access the media." });
+    return Result.error("User cannot access the media");
+  }
+
+  const delFromS3 = await s3Ops.deleteEntry(key.value.data.key, log);
+
+  if (!delFromS3.value.success) return Result.error(delFromS3.value.error);
+  const x = await drizzleService.remove(
+    mediaTable,
+    (mediaTable) => eq(mediaTable.id, id),
+    db,
+    log,
+  );
+
+  if (!x.value.success) return Result.error(x.value.error);
+
+  return Result.ok(undefined);
+}
+
 export const mediaService = {
   read,
+  del,
 };

@@ -88,9 +88,9 @@ async function update<T extends AnyPgTable>(
   }
 }
 
-async function remove(
-  table: AnyPgTable,
-  condition: (t: AnyPgTable) => SQL | ReturnType<typeof and>,
+async function remove<T extends AnyPgTable>(
+  table: T,
+  condition: (t: T) => SQL | ReturnType<typeof and>,
   tx: DB,
   log: Logger,
 ): Promise<Result<undefined, string>> {
