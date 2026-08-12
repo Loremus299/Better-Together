@@ -27,10 +27,8 @@ async function insert<T extends AnyPgTable>(
 }
 
 async function readAllWithCondition<T extends AnyPgTable>(
-  table: AnyPgTable,
-  condition: (
-    t: AnyPgTable,
-  ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
+  table: T,
+  condition: (t: T) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
   tx: DB,
   log: Logger,
 ): Promise<Result<InferSelectModel<T>[], string>> {
@@ -38,7 +36,7 @@ async function readAllWithCondition<T extends AnyPgTable>(
   try {
     const data = (await tx
       .select()
-      .from(table)
+      .from(table as AnyPgTable)
       .where(condition(table))) as InferSelectModel<T>[];
     return Result.ok(data);
   } catch (error) {
@@ -48,10 +46,8 @@ async function readAllWithCondition<T extends AnyPgTable>(
 }
 
 async function readWithCondition<T extends AnyPgTable>(
-  table: AnyPgTable,
-  condition: (
-    t: AnyPgTable,
-  ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
+  table: T,
+  condition: (t: T) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
   tx: DB,
   log: Logger,
 ): Promise<Result<InferSelectModel<T>, string>> {
@@ -59,7 +55,7 @@ async function readWithCondition<T extends AnyPgTable>(
   try {
     const data = (await tx
       .select()
-      .from(table)
+      .from(table as AnyPgTable)
       .where(condition(table))) as InferSelectModel<T>[];
 
     if (data.length !== 0) {
