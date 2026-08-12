@@ -22,7 +22,7 @@ async function createEntry({
   const key = `${createId()}-${file.type.replaceAll("/", "-")}`;
   log.info({ key });
 
-  try {
+  const x = await Result.tryCatch({}, async () => {
     await s3.send(
       new PutObjectCommand({
         Bucket: env.S3_BUCKET,
@@ -30,10 +30,13 @@ async function createEntry({
         Body: Buffer.from(await file.arrayBuffer()),
       }),
     );
+  });
+
+  if (x.value.success) {
     return Result.ok(key);
-  } catch (error) {
-    log.error({ s3Error: error as string });
-    return Result.error("Failed to create file in s3");
+  } else {
+    log.error({ s3Error: x.value.error });
+    return Result.error("Could not create");
   }
 }
 
@@ -43,8 +46,8 @@ async function readEntry(
 ): Promise<Result<string, string>> {
   log.trace({ layer: "ops s3 service" });
   log.debug({ key });
-  try {
-    const url = await getSignedUrl(
+  const x = await Result.tryCatch({}, async () => {
+    return await getSignedUrl(
       s3,
       new GetObjectCommand({
         Bucket: env.S3_BUCKET,
@@ -52,10 +55,13 @@ async function readEntry(
       }),
       { expiresIn: 3600 },
     );
-    return Result.ok(url);
-  } catch (error) {
-    log.error({ s3Error: error as string });
-    return Result.error("Failed to read file in s3");
+  });
+
+  if (x.value.success) {
+    return Result.ok(key);
+  } else {
+    log.error({ s3Error: x.value.error });
+    return Result.error("Could not read");
   }
 }
 
@@ -65,17 +71,20 @@ async function deleteEntry(
 ): Promise<Result<undefined, string>> {
   log.trace({ layer: "ops s3 service" });
   log.debug({ key });
-  try {
+  const x = await Result.tryCatch({}, async () => {
     await s3.send(
       new DeleteObjectCommand({
         Bucket: env.S3_BUCKET,
         Key: key,
       }),
     );
+  });
+
+  if (x.value.success) {
     return Result.ok(undefined);
-  } catch (error) {
-    log.error({ s3Error: error as string });
-    return Result.error("Could not delete file from s3");
+  } else {
+    log.error({ s3Error: x.value.error });
+    return Result.error("Could not delete");
   }
 }
 
