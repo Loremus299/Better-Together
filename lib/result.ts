@@ -63,4 +63,8 @@ export class Result<T, E> {
       ? Result.ok<T, F>(this.value.data)
       : Result.error<T, F>(fun(this.value.error));
   }
+
+  public type() {
+    return this.value as ResultType<T, E>;
+  }
 }

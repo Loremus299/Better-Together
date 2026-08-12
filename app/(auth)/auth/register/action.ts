@@ -2,7 +2,7 @@
 
 import { notificationService } from "@/app/api/notification/service";
 import { Logger } from "@/lib/logger";
-import { Result } from "@/lib/result";
+import { Result, ResultType } from "@/lib/result";
 
 export async function signUpNotification({
   id,
@@ -10,7 +10,7 @@ export async function signUpNotification({
 }: {
   id: string;
   name: string;
-}): Promise<Result<"", string>> {
+}): Promise<ResultType<undefined, string>> {
   const log = new Logger();
   log.trace({ layer: "Sign Up Notification Action" });
 
@@ -22,8 +22,9 @@ export async function signUpNotification({
       log,
     });
 
-    if (!notif.value.success) return Result.error(notif.value.error);
-    return Result.ok("");
+    if (!notif.value.success)
+      return Result.error<undefined, string>(notif.value.error).type();
+    return Result.ok<undefined, string>(undefined).type();
   } finally {
     log.print();
   }
