@@ -59,13 +59,14 @@ export default function RegisterForm({
     }
 
     toast.success("Account created successfully.");
-    (
-      await signUpNotification({
-        id: act.data.user.id,
-        name: act.data.user.name,
-      })
-    ).mapError((e) => toast.error(e));
     router.push("/dashboard");
+    const x = await signUpNotification({
+      id: act.data.user.id,
+      name: act.data.user.name,
+    });
+    if (!x.success) {
+      toast.error(x.error);
+    }
   };
 
   return (
