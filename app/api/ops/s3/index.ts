@@ -104,7 +104,7 @@ async function deleteEntry({
   );
 }
 
-export const s3Service = {
+export const s3Ops = {
   createEntry,
   readEntry,
   deleteEntry,

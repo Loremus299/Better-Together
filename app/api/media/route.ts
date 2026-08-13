@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth";
 import { Logger } from "@/lib/logger";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { s3Service } from "../ops/s3";
-import { drizzleService } from "../ops/drizzle";
+import { s3Ops } from "../ops/s3";
+import { drizzleOps } from "../ops/drizzle";
 import { mediaTable } from "@/db/schema";
 
 export async function POST(req: NextRequest) {
@@ -47,14 +47,14 @@ export async function POST(req: NextRequest) {
     }
     log.info({ file: `${file.name}-${file.size}-${file.type}` });
 
-    const key = await s3Service.createEntry({ file, log });
+    const key = await s3Ops.createEntry({ file, log });
     if (!key.value.success)
       return NextResponse.json({
         error: key.value.error,
         request: log.getId(),
       });
 
-    const mediaTableLog = await drizzleService.insert(
+    const mediaTableLog = await drizzleOps.insert(
       mediaTable,
       {
         key: key.value.data,
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!mediaTableLog.value.success) {
-      (await s3Service.deleteEntry({ key: key.value.data, log: log })).mapError(
+      (await s3Ops.deleteEntry({ key: key.value.data, log: log })).mapError(
         () =>
           log.error({
             error: "media table log failed, s3 delete failed as well",

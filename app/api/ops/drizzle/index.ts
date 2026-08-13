@@ -133,7 +133,7 @@ async function remove<T extends AnyPgTable>(
   );
 }
 
-export const drizzleService = {
+export const drizzleOps = {
   insert,
   readAllWithCondition,
   readWithCondition,
