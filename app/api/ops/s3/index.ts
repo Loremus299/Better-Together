@@ -43,10 +43,13 @@ async function createEntry({
   );
 }
 
-async function readEntry(
-  key: string,
-  log: Logger,
-): Promise<Result<string, string>> {
+async function readEntry({
+  key,
+  log,
+}: {
+  key: string;
+  log: Logger;
+}): Promise<Result<string, string>> {
   log.trace({ layer: "s3 ops read" });
   log.debug({ key });
   return (
@@ -72,10 +75,13 @@ async function readEntry(
   );
 }
 
-async function deleteEntry(
-  key: string,
-  log: Logger,
-): Promise<Result<undefined, string>> {
+async function deleteEntry({
+  key,
+  log,
+}: {
+  key: string;
+  log: Logger;
+}): Promise<Result<undefined, string>> {
   log.trace({ layer: "ops s3 service" });
   log.debug({ key });
   return (
