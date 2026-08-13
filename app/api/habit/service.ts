@@ -59,6 +59,8 @@ async function readHabit({
   habit: string;
   log: Logger;
 }): Promise<Result<InferSelectModel<typeof habitTable>, string>> {
+  log.trace({ layer: "habit service read" });
+  log.info({ habit });
   return await drizzleOps.readWithCondition(
     habitTable,
     (habitTable) => eq(habitTable.id, habit),
@@ -73,6 +75,8 @@ async function readHabitsByUser({
   user: string;
   log: Logger;
 }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
+  log.trace({ layer: "habit service read all by user" });
+  log.info({ user });
   const habits: InferSelectModel<typeof habitTable>[] = [];
   const query = (
     await drizzleOps.readAllWithCondition(
@@ -113,6 +117,8 @@ async function updateHeader({
   habit: string;
   log: Logger;
 }): Promise<Result<void, string>> {
+  log.trace({ layer: "habit service updaet header" });
+  log.info({ habit, header });
   return await drizzleOps.update(
     habitTable,
     { header: header },
@@ -132,6 +138,8 @@ async function updateHabit({
   description: string;
   log: Logger;
 }): Promise<Result<void, string>> {
+  log.trace({ layer: "habit service update habit" });
+  log.info({ habit, name, description });
   return await drizzleOps.update(
     habitTable,
     { name, description },
