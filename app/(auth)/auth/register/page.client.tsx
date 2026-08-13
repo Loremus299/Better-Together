@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import FormController from "@/components/formController";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import { registrationNotification } from "./action";
 
 export const formSchema = z.object({
   name: z.string().min(1),
@@ -55,6 +56,18 @@ export default function RegisterForm({
         act.error.message ?? "Something went wrong. Please try again.",
       );
       return;
+    } else {
+      const notif = await registrationNotification({
+        user: act.data.user.id,
+        name: act.data.user.name,
+      });
+
+      if (notif.success) {
+        toast.success("Welcome to Better Together.");
+        router.push("/dashboard");
+      } else {
+        router.push(`/error?e=${notif.error.error}&id=${notif.error.request}`);
+      }
     }
 
     toast.success("Account created successfully.");
