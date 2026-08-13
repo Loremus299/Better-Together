@@ -7,9 +7,9 @@ export default async function Page({
 }) {
   const sp = await searchParams;
   return (
-    <div className="min-h-screen grid place-items-center w-screen">
-      <main className="max-w-sm text-center">
-        <h1 className="font-bold text-7xl tracking-tight">!!ERROR!!</h1>
+    <div className="min-h-screen grid place-items-center w-screen p-4">
+      <main className="max-w-xl text-center">
+        <h1 className="font-bold text-8xl tracking-tight">!!ERROR!!</h1>
         <h4 className="tracking-tight font-semibold">｡°(°.◜ᯅ◝°)°｡</h4>
         <div className="w-full h-0.5 border border-muted-foreground border-dashed mt-2 mb-2" />
         <p>{sp.e}</p>

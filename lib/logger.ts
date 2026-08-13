@@ -107,6 +107,6 @@ export class Logger {
   }
 
   public getId() {
-    return this.context[0].key;
+    return this.context[0].value as string;
   }
 }

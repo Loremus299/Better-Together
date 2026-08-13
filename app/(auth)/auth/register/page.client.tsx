@@ -56,20 +56,20 @@ export default function RegisterForm({
         act.error.message ?? "Something went wrong. Please try again.",
       );
       return;
-    } else {
-      const notif = await registrationNotification({
-        user: act.data.user.id,
-        name: act.data.user.name,
-      });
+    }
 
-      if (notif.success) {
-        toast.success("Welcome to Better Together.");
-        router.push("/dashboard");
-        return;
-      } else {
-        router.push(`/error?e=${notif.error.error}&id=${notif.error.request}`);
-        return;
-      }
+    const notif = await registrationNotification({
+      user: act.data.user.id,
+      name: act.data.user.name,
+    });
+
+    if (notif.success) {
+      toast.success("Welcome to Better Together.");
+      router.replace("/dashboard");
+      return;
+    } else {
+      router.replace(`/error?e=${notif.error.error}&id=${notif.error.request}`);
+      return;
     }
   };
 
