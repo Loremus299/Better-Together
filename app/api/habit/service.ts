@@ -148,10 +148,22 @@ async function updateHabit({
   );
 }
 
+async function deleteHabit({ habit, log }: { habit: string; log: Logger }) {
+  log.trace({ layer: "habit service update delete" });
+  log.info({ habit });
+
+  return await drizzleOps.remove(
+    habitTable,
+    (habitTable) => eq(habitTable.id, habit),
+    log,
+  );
+}
+
 export const habitService = {
   create,
   readHabitsByUser,
   readHabit,
   updateHeader,
   updateHabit,
+  deleteHabit,
 };
