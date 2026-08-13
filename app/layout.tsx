@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full ${geistSans.variable}`}>
-      <body className="antialiased">
+      <body className="antialiased dark">
         <Toaster position={"top-center"} />
         <TooltipProvider>{children}</TooltipProvider>
       </body>
