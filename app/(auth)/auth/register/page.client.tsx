@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import FormController from "@/components/formController";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
-import { signUpNotification } from "./action";
 
 export const formSchema = z.object({
   name: z.string().min(1),
@@ -60,13 +59,6 @@ export default function RegisterForm({
 
     toast.success("Account created successfully.");
     router.push("/dashboard");
-    const x = await signUpNotification({
-      id: act.data.user.id,
-      name: act.data.user.name,
-    });
-    if (!x.success) {
-      toast.error(x.error);
-    }
   };
 
   return (
