@@ -43,7 +43,7 @@ export default async function NotifDisplay() {
       <DropdownMenuContent className="max-w-sm w-full">
         <DropdownMenuGroup>
           {notifs.value.data.reverse().map((item) => (
-            <div className="p-2 font-medium" key={item.id}>
+            <div className="p-2 font-medium grid gap-1" key={item.id}>
               <div className="flex items-center justify-between">
                 <p
                   className={cn(

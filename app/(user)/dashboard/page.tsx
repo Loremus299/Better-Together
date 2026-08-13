@@ -46,7 +46,7 @@ export default function Page() {
                 className="hover:border hover:border-chart-2"
               >
                 <div className="h-full w-full grid place-items-center">
-                  Streak Cal
+                  Habit Cal
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
