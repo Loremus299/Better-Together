@@ -86,18 +86,20 @@ async function readWithCondition<T extends AnyPgTable>(
 }
 
 async function update<T extends AnyPgTable>(
-  table: AnyPgTable,
+  table: T,
   data: Partial<InferInsertModel<T>>,
-  condition: (
-    t: AnyPgTable,
-  ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
+  condition: (t: T) => SQL | ReturnType<typeof and> | ReturnType<typeof or>,
   log: Logger,
 ): Promise<Result<undefined, string>> {
   log.trace({ layer: "drizzle ops update" });
   log.data({ ...data });
   return (
     await Result.tryCatch({}, async () => {
-      return await db.update(table).set(data).returning();
+      return (await db
+        .update(table)
+        .set(data)
+        .where(condition(table))
+        .returning()) as InferSelectModel<T>;
     })
   ).match(
     (t) => {

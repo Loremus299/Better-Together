@@ -1,9 +1,9 @@
 import { Logger } from "@/lib/logger";
-import { drizzleOps } from "../ops/drizzle";
+import { drizzleOps } from "../drizzle";
 import { mediaTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Result } from "@/lib/result";
-import { s3Ops } from "../ops/s3";
+import { s3Ops } from "../s3";
 
 async function readFile({
   id,
