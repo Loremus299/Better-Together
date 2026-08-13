@@ -65,13 +65,12 @@ export default function RegisterForm({
       if (notif.success) {
         toast.success("Welcome to Better Together.");
         router.push("/dashboard");
+        return;
       } else {
         router.push(`/error?e=${notif.error.error}&id=${notif.error.request}`);
+        return;
       }
     }
-
-    toast.success("Account created successfully.");
-    router.push("/dashboard");
   };
 
   return (
