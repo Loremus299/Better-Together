@@ -27,6 +27,8 @@ export default async function HabitDisplay() {
     redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
   }
 
+  log.print();
+
   if (habits.value.data.length === 0) {
     return (
       <div className="w-full h-full grid place-items-center">

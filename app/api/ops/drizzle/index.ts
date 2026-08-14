@@ -46,7 +46,6 @@ async function readAllWithCondition<T extends AnyPgTable>(
     })
   ).match(
     (t) => {
-      log.debug({ allData: t.toString() });
       return Result.ok(t);
     },
     (e) => {

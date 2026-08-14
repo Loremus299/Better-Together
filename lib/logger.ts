@@ -46,7 +46,7 @@ export class Logger {
     for (const [k, v] of Object.entries(data)) {
       this.context.push({
         key: `[${type.toUpperCase().padEnd(5)}] ${k}`,
-        value: v,
+        value: JSON.stringify(v),
         time: new Date().getTime(),
       });
     }

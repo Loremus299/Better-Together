@@ -24,8 +24,10 @@ export default async function NotifDisplay() {
     user: session.user.id,
     log,
   });
-  if (!notifs.value.success)
+  if (!notifs.value.success) {
+    log.print();
     redirect(`/error?e=${notifs.value.error}&id=${log.getId()}`);
+  }
 
   log.print();
   return (
