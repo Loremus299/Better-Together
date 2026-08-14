@@ -36,7 +36,18 @@ async function readByUser({
   );
 }
 
+async function readById({ id, log }: { id: string; log: Logger }) {
+  log.trace({ layer: "notif ops read by user" });
+  log.debug({ id });
+  return await drizzleOps.readWithCondition(
+    notificationTable,
+    (notificationTable) => eq(notificationTable.id, id),
+    log,
+  );
+}
+
 export const notificationService = {
   markNotifRead,
   readByUser,
+  readById,
 };

@@ -20,6 +20,21 @@ export async function markNotificationAsReadAction(
       }).type();
     }
 
+    const notif = await notificationService.readById({ id, log });
+    if (!notif.value.success) {
+      return Result.error<undefined, { error: string; request: string }>({
+        error: "No notification found",
+        request: log.getId(),
+      }).type();
+    }
+
+    if (notif.value.data.user !== session.user.id) {
+      return Result.error<undefined, { error: string; request: string }>({
+        error: "You can't mutate this notification",
+        request: log.getId(),
+      }).type();
+    }
+
     return (await notificationService.markNotifRead({ id, log }))
       .mapError((e) => ({ error: e, request: log.getId() }))
       .type();
