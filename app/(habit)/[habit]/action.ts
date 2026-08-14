@@ -24,7 +24,7 @@ export async function updateDetailsAction({
   }
 }
 
-export async function updateHeader({
+export async function updateHeaderAction({
   habit,
   header,
 }: {

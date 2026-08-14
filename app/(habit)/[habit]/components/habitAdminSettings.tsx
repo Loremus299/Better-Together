@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { IconPencil } from "@tabler/icons-react";
+import { IconPencil, IconPhotoPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import UpdateDetailsDialog from "./updateDetailsDialog";
+import UpdateHeaderDialog from "./updateHeaderDialog";
 
 export default function HabitAdminSettings({
   name,
@@ -14,23 +15,38 @@ export default function HabitAdminSettings({
   description: string;
   habit: string;
 }) {
-  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+  const [updateDetailsOpen, setUpdateDetailsOpen] = useState(false);
+  const [updateHeaderOpen, setUpdateHeaderOpen] = useState(false);
+
   return (
     <div>
       <Button
         variant={"ghost"}
         className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setEditDetailsOpen(true)}
+        onClick={() => setUpdateDetailsOpen(true)}
       >
         <IconPencil />
       </Button>
+      <Button
+        variant={"ghost"}
+        className="border hover:border-accent border-muted-background rounded-none"
+        onClick={() => setUpdateHeaderOpen(true)}
+      >
+        <IconPhotoPlus />
+      </Button>
 
       <UpdateDetailsDialog
-        open={editDetailsOpen}
-        onOpenChange={setEditDetailsOpen}
+        open={updateDetailsOpen}
+        onOpenChange={setUpdateDetailsOpen}
         name={name}
         description={description}
         habit={habit}
+      />
+
+      <UpdateHeaderDialog
+        habit={habit}
+        open={updateHeaderOpen}
+        onOpenChange={setUpdateHeaderOpen}
       />
     </div>
   );

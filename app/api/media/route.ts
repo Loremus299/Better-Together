@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { key: key.value.data, request: log.getId() },
+      { id: mediaTableLog.value.data.id, request: log.getId() },
       { status: 200 },
     );
   } catch {
