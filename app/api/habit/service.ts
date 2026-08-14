@@ -78,35 +78,38 @@ async function readHabitsByUser({
 }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
   log.trace({ layer: "habit service read all by user" });
   log.info({ user });
-  const habits: InferSelectModel<typeof habitTable>[] = [];
-  const query = (
-    await drizzleOps.readAllWithCondition(
-      habitMembersTable,
-      (habitMembersTable) => eq(habitMembersTable.member, user),
-      log,
-    )
-  ).mapOk(async (t) => {
-    for (const i of t) {
-      (
-        await drizzleOps.readWithCondition(
-          habitTable,
-          (habitTable) => eq(habitTable.id, i.habit),
-          log,
-        )
-      ).match(
-        (t) => {
-          habits.push(t);
-        },
-        (e) => {
-          log.warn({ error: e });
-        },
-      );
-    }
-  });
+  const query = await drizzleOps.readAllWithCondition(
+    habitMembersTable,
+    (habitMembersTable) => eq(habitMembersTable.member, user),
+    log,
+  );
 
-  return query.value.success
-    ? Result.ok(habits)
-    : Result.error(query.value.error);
+  return query.match(
+    async (members) => {
+      const rows = await Promise.all(
+        members.map((m) =>
+          drizzleOps.readWithCondition(
+            habitTable,
+            (habitTable) => eq(habitTable.id, m.habit),
+            log,
+          ),
+        ),
+      );
+
+      const habits: InferSelectModel<typeof habitTable>[] = [];
+      for (const r of rows) {
+        r.match(
+          (h) => {
+            habits.push(h);
+            return;
+          },
+          (e) => log.warn({ error: e }),
+        );
+      }
+      return Result.ok(habits);
+    },
+    async (e) => Result.error<InferSelectModel<typeof habitTable>[], string>(e),
+  );
 }
 
 async function updateHeader({
