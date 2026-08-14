@@ -7,6 +7,7 @@ import {
 import NotifDisplay from "./components/notifDisplay";
 import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
+import HabitDisplay from "./components/habitDisplay";
 
 export default async function Page() {
   const session = await getSession();
@@ -53,7 +54,7 @@ export default async function Page() {
                 className="hover:border hover:border-chart-2"
               >
                 <div className="h-full w-full grid place-items-center">
-                  Habit Cal
+                  <HabitDisplay />
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
