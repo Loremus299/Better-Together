@@ -60,7 +60,7 @@ export default async function Page({
     <MaxWContainer>
       <main className="border border-muted-background">
         <ResizablePanelGroup orientation="vertical" className="min-h-screen">
-          <ResizablePanel defaultSize={"120px"}>
+          <ResizablePanel defaultSize={"90px"}>
             {isAdmin.value.data ? (
               <ResizablePanelGroup>
                 <ResizablePanel>
