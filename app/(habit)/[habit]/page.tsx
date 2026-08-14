@@ -82,7 +82,7 @@ export default async function Page({
                   </div>
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={"80px"}>
+                <ResizablePanel defaultSize={"76px"}>
                   <HabitAdminSettings
                     name={habitdata.value.data.name}
                     description={habitdata.value.data.description}

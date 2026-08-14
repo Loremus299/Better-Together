@@ -77,6 +77,7 @@ export default function UpdateHeaderDialog({
               <Input
                 aria-invalid={fieldState.invalid}
                 type="file"
+                accept="image/png, image/gif, image/jpeg"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   field.onChange(file);
