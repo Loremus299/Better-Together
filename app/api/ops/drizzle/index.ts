@@ -13,10 +13,11 @@ async function insert<T extends AnyPgTable>(
   log.data({ ...data });
   return (
     await Result.tryCatch({}, async () => {
-      return (await db
+      const rows = (await db
         .insert(table)
         .values(data)
-        .returning()) as InferSelectModel<T>;
+        .returning()) as InferSelectModel<T>[];
+      return rows[0] as InferSelectModel<T>;
     })
   ).match(
     (t) => {
