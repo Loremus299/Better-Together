@@ -16,7 +16,7 @@ async function create({
   description: string;
   header?: string;
   log: Logger;
-}): Promise<Result<void, string>> {
+}): Promise<Result<string, string>> {
   log.trace({ layer: "habit service create" });
   log.info({ user, name, description, header });
   return (
@@ -49,6 +49,7 @@ async function create({
       },
       log,
     );
+    return t.id;
   });
 }
 

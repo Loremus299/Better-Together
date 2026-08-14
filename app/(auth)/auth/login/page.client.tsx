@@ -55,7 +55,7 @@ export default function LoginForm({
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-2">
       <FieldGroup>
         <FormController
           form={form}

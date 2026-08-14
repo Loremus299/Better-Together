@@ -5,8 +5,15 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import NotifDisplay from "./components/notifDisplay";
+import { getSession } from "@/lib/server-util";
+import { redirect } from "next/navigation";
 
-export default function Page() {
+export default async function Page() {
+  const session = await getSession();
+  if (!session) {
+    redirect("auth/login");
+  }
+
   return (
     <MaxWContainer>
       <main className="border">
