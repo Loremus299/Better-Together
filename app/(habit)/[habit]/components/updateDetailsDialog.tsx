@@ -13,14 +13,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconPencil } from "@tabler/icons-react";
 
-const editDetailsSchema = z.object({
+const updateDetailsSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   habit: z.string().min(1),
 });
-type EditDetailsValue = z.infer<typeof editDetailsSchema>;
+type UpdateDetailsValue = z.infer<typeof updateDetailsSchema>;
 
-export default function EditDetailsDialog({
+export default function UpdateDetailsDialog({
   open,
   onOpenChange,
   name,
@@ -35,7 +35,7 @@ export default function EditDetailsDialog({
 }) {
   const router = useRouter();
   const form = useForm({
-    resolver: zodResolver(editDetailsSchema),
+    resolver: zodResolver(updateDetailsSchema),
     defaultValues: {
       name,
       description,
@@ -43,7 +43,7 @@ export default function EditDetailsDialog({
     },
   });
 
-  const onSubmit = async (values: EditDetailsValue) => {
+  const onSubmit = async (values: UpdateDetailsValue) => {
     console.log("hi");
     const act = await updateDetailsAction(values);
     if (act.success) {

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import EditDetailsDialog from "./editDetailsDialog";
+import UpdateDetailsDialog from "./updateDetailsDialog";
 
 export default function HabitAdminSettings({
   name,
@@ -25,7 +25,7 @@ export default function HabitAdminSettings({
         <IconPencil />
       </Button>
 
-      <EditDetailsDialog
+      <UpdateDetailsDialog
         open={editDetailsOpen}
         onOpenChange={setEditDetailsOpen}
         name={name}
