@@ -10,6 +10,7 @@ import {
 import { Logger } from "@/lib/logger";
 import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
+import HabitAdminSettings from "./components/habitAdminSettings";
 
 export default async function Page({
   params,
@@ -81,7 +82,13 @@ export default async function Page({
                   </div>
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={"80px"}></ResizablePanel>
+                <ResizablePanel defaultSize={"80px"}>
+                  <HabitAdminSettings
+                    name={habitdata.value.data.name}
+                    description={habitdata.value.data.description}
+                    habit={habit}
+                  />
+                </ResizablePanel>
               </ResizablePanelGroup>
             ) : (
               <div className="w-full h-full p-4 flex gap-4">

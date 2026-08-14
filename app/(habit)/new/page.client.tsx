@@ -11,7 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconCheck } from "@tabler/icons-react";
-import { createHabitSchema, CreateHabitValues } from "./common";
+import z from "zod";
+
+const createHabitSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+});
+type CreateHabitValues = z.infer<typeof createHabitSchema>;
 
 export default function CreateHabitForm({
   name,
