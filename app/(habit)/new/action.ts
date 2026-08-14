@@ -4,13 +4,7 @@ import { habitService } from "@/app/api/habit/service";
 import { Logger } from "@/lib/logger";
 import { Result, ResultType } from "@/lib/result";
 import { getSession } from "@/lib/server-util";
-import z from "zod";
-
-export const createHabitSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-});
-export type CreateHabitValues = z.infer<typeof createHabitSchema>;
+import { CreateHabitValues } from "./common";
 
 export async function createHabitAction(
   values: CreateHabitValues,

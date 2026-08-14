@@ -1,11 +1,9 @@
+"use client";
+
 import { FieldGroup } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  createHabitAction,
-  createHabitSchema,
-  CreateHabitValues,
-} from "./action";
+import { createHabitAction } from "./action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import FormController from "@/components/formController";
@@ -13,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconCheck } from "@tabler/icons-react";
+import { createHabitSchema, CreateHabitValues } from "./common";
 
 export default function CreateHabitForm({
   name,
