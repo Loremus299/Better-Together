@@ -36,11 +36,13 @@ export default async function Page({
     log,
   });
   const habitdata = await habitService.readHabit({ habit, log });
+  const members = await habitService.readMembersByHabit({ habit, log });
 
   if (
     !isAdmin.value.success ||
     !isMember.value.success ||
-    !habitdata.value.success
+    !habitdata.value.success ||
+    !members.value.success
   ) {
     log.print();
     redirect(
@@ -87,6 +89,7 @@ export default async function Page({
                     name={habitdata.value.data.name}
                     description={habitdata.value.data.description}
                     habit={habit}
+                    members={members.value.data}
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>

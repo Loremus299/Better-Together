@@ -6,7 +6,7 @@ import {
 } from "@/db/schema";
 import { drizzleOps } from "../ops/drizzle";
 import { Logger } from "@/lib/logger";
-import { eq, InferSelectModel } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { Result } from "@/lib/result";
 
 async function create({
@@ -201,12 +201,54 @@ async function readMembersByHabit({
 }: {
   habit: string;
   log: Logger;
-}) {
+}): Promise<Result<InferSelectModel<typeof user>[], string>> {
   log.trace({ layer: "habit service read member by id" });
   log.info({ habit });
-  return await drizzleOps.readWithCondition(
+  const members = await drizzleOps.readAllWithCondition(
     habitMembersTable,
     (habitMembersTable) => eq(habitMembersTable.habit, habit),
+    log,
+  );
+
+  if (!members.value.success) {
+    return Result.error("Could not find habit members");
+  }
+
+  const userDetails = [];
+  for (const member of members.value.data) {
+    const memberDetails = await drizzleOps.readWithCondition(
+      user,
+      (user) => eq(user.id, member.member),
+      log,
+    );
+    if (!memberDetails.value.success) {
+      return Result.error(`could not find user details for link ${member.id}`);
+    }
+
+    userDetails.push(memberDetails.value.data);
+  }
+  return Result.ok(userDetails);
+}
+
+async function removeMemberById({
+  habit,
+  user,
+  log,
+}: {
+  habit: string;
+  user: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service remove member by id" });
+  log.info({ habit, user });
+  return await drizzleOps.remove(
+    habitMembersTable,
+    (habitMembersTable) =>
+      and(
+        eq(habitMembersTable.habit, habit),
+        eq(habitMembersTable.member, user),
+        eq(habitMembersTable.role, "member"),
+      ),
     log,
   );
 }
@@ -221,4 +263,5 @@ export const habitService = {
 
   addMember,
   readMembersByHabit,
+  removeMemberById,
 };
