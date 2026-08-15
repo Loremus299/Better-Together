@@ -71,7 +71,7 @@ export default function HabitAdminSettings({
         className="border hover:border-accent border-muted-background rounded-none"
         onClick={() => setRemoveMemberOpen(true)}
       >
-        <IconMailMinus />
+        <IconMailMinus className="text-destructive" />
       </Button>
 
       <Button
