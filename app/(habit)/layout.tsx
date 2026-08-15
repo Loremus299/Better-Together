@@ -1,4 +1,4 @@
-import { userId } from "@/lib/server-util";
+import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -6,8 +6,8 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const id = await userId();
-  if (!id.success) {
+  const session = await getSession();
+  if (!session) {
     redirect("/auth/login");
   }
 

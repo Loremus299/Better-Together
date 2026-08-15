@@ -19,7 +19,7 @@ export default function NotifMarkButton({ id }: { id: string }) {
           toast.success("Notification marked as read");
           router.refresh();
         } else {
-          toast.error(act.error);
+          router.replace(`/error?e=${act.error.error}&id=${act.error.request}`);
         }
       }}
     >

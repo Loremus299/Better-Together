@@ -6,28 +6,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { db } from "@/db";
-import { userId } from "@/lib/server-util";
-import { IconCrownFilled } from "@tabler/icons-react";
+import { Logger } from "@/lib/logger";
+import { getSession } from "@/lib/server-util";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function HabitDisplay() {
-  const id = await userId();
-  if (!id.success) {
+  const log = new Logger();
+  const session = await getSession();
+  if (!session) {
     redirect("/auth/login");
   }
 
-  const habits = await habitService.readAllHabitsByUser({
-    userId: id.data,
-    tx: db,
+  const habits = await habitService.readHabitsByUser({
+    user: session.user.id,
+    log,
   });
 
-  if (!habits.success) {
-    redirect(`/error?e=${habits.error}`);
+  if (!habits.value.success) {
+    redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
   }
 
-  if (habits.data.length === 0) {
+  log.print();
+
+  if (habits.value.data.length === 0) {
     return (
       <div className="w-full h-full grid place-items-center">
         <div className="text-center">
@@ -45,17 +47,12 @@ export default async function HabitDisplay() {
   return (
     <div className="w-full h-full @container">
       <div className="columns @max-[500px]:columns-1 @max-[800px]:columns-2 @max-[1100px]:columns-3 columns-4 gap-4 p-4 overflow-y-scroll">
-        {habits.data.map((item) => (
+        {habits.value.data.map((item) => (
           <Link href={`/${item.id}`} key={item.id} className="h-max">
             <Card className="hover:scale-105 hover:rotate-6 duration-300 transition hover:drop-shadow-2xl mb-4 break-inside-avoid">
-              <ImageById id={item.header!} css="w-full" />
+              {item.header && <ImageById id={item.header} />}
               <CardHeader>
                 <CardTitle className="flex gap-2 items-center">
-                  {item.admin === id.data ? (
-                    <IconCrownFilled className="size-4 text-chart-3" />
-                  ) : (
-                    ""
-                  )}
                   {item.name}
                 </CardTitle>
                 <CardDescription>{item.description}</CardDescription>

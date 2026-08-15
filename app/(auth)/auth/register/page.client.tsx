@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { z } from "zod";
-import { formSchema } from "./common";
+import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
@@ -14,40 +13,68 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import FormController from "@/components/formController";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import { registrationNotification } from "./action";
+
+export const formSchema = z.object({
+  name: z.string().min(1),
+  email: z.string(),
+  password: z.string(),
+});
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function RegisterForm() {
+export default function RegisterForm({
+  name,
+  email,
+  password,
+}: {
+  name: string;
+  email: string;
+  password: string;
+}) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
+      name,
+      email,
+      password,
     },
   });
 
   const onSubmit = async (values: FormValues) => {
-    const { error } = await authClient.signUp.email({
+    const act = await authClient.signUp.email({
       name: values.name,
       email: values.email,
       password: values.password,
     });
 
-    if (error) {
-      toast.error(error.message ?? "Something went wrong. Please try again.");
+    if (act.error) {
+      toast.error(
+        act.error.message ?? "Something went wrong. Please try again.",
+      );
       return;
     }
 
-    toast.success("Account created successfully.");
-    router.push("/dashboard");
+    const notif = await registrationNotification({
+      user: act.data.user.id,
+      name: act.data.user.name,
+    });
+
+    if (notif.success) {
+      toast.success("Welcome to Better Together.");
+      router.replace("/dashboard");
+      return;
+    } else {
+      router.replace(`/error?e=${notif.error.error}&id=${notif.error.request}`);
+      return;
+    }
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-2">
       <FieldGroup>
         <FormController
           form={form}

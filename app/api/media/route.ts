@@ -1,182 +1,100 @@
-import { db } from "@/db";
-import { mediaTable } from "@/db/schema";
-import { env } from "@/env";
 import { auth } from "@/lib/auth";
-import { useLogger, withEvlog } from "@/lib/evlog";
-import { s3 } from "@/lib/s3";
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import { createId } from "@paralleldrive/cuid2";
-import { and, eq } from "drizzle-orm";
+import { Logger } from "@/lib/logger";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { s3Ops } from "../ops/s3";
+import { drizzleOps } from "../ops/drizzle";
+import { mediaTable } from "@/db/schema";
 
-export const GET = withEvlog(async (request: NextRequest) => {
-  const log = useLogger();
-  const head = await headers();
-  const session = await auth.api.getSession({ headers: head });
-  if (!session) {
-    return NextResponse.json(
-      { error: "User session does not exist" },
-      { status: 401 },
-    );
-  }
-  log.set({ user: session.user.id });
-
-  const schema = z.object({
-    id: z.string().min(1),
-  });
-  const data = request.nextUrl.searchParams;
-  const parsedData = schema.safeParse({ id: data.get("id") });
-  if (!parsedData.success) {
-    return NextResponse.json(
-      { error: z.treeifyError(parsedData.error) },
-      { status: 400 },
-    );
-  }
-  log.set({ id: parsedData.data.id });
-
-  const key = await db
-    .select({ key: mediaTable.key })
-    .from(mediaTable)
-    .where(eq(mediaTable.id, parsedData.data.id));
-  if (!key[0]) {
-    return NextResponse.json({ error: "File not found" }, { status: 404 });
-  }
-  log.set({ key: key[0].key });
-
-  const url = await getSignedUrl(
-    s3,
-    new GetObjectCommand({
-      Bucket: env.S3_BUCKET,
-      Key: key[0].key,
-    }),
-    { expiresIn: 3600 },
-  );
-  return NextResponse.json({ log: url }, { status: 200 });
-});
-
-export const POST = withEvlog(
-  async (request: NextRequest): Promise<NextResponse> => {
-    const log = useLogger();
+export async function POST(req: NextRequest) {
+  const log = new Logger();
+  log.info({ layer: "api/media POST" });
+  try {
     const head = await headers();
+    log.debug({ headers: head });
     const session = await auth.api.getSession({ headers: head });
+
     if (!session) {
+      log.error({ error: "No user session found" });
       return NextResponse.json(
-        { error: "User session does not exist" },
+        {
+          error: "No user session found",
+          request: log.getId(),
+        },
         { status: 401 },
       );
     }
-    log.set({ user: session.user.id });
+    log.info({ user: session.user.id });
 
-    const schema = z.object({
-      file: z
-        .file()
-        .refine((item) =>
-          ["image/png", "image/jpeg", "image/gif"].includes(item.type),
-        ),
-    });
-    const data = await request.formData();
-    const parsedData = schema.safeParse({ file: data.get("file") });
-    if (!parsedData.success) {
-      return NextResponse.json(
-        { error: z.treeifyError(parsedData.error) },
-        { status: 400 },
-      );
-    }
-    log.set({ fileName: parsedData.data.file.name });
-
-    const key = `${createId()}-${parsedData.data.file.type.replaceAll("/", "-")}`;
-    try {
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: env.S3_BUCKET,
-          Key: key,
-          Body: Buffer.from(await parsedData.data.file.arrayBuffer()),
-        }),
-      );
-      const dbLog = await db
-        .insert(mediaTable)
-        .values({ key: key, owner: session.user.id })
-        .returning({ id: mediaTable.id });
-      if (dbLog.length == 0) {
-        throw new Error("DB log for uploaded file failed");
-      }
-      log.set({ id: dbLog[0].id, key: key });
-      return NextResponse.json({ log: dbLog[0].id }, { status: 200 });
-    } catch (e) {
-      log.set({ error: e });
-      await s3.send(
-        new DeleteObjectCommand({
-          Bucket: env.S3_BUCKET,
-          Key: key,
-        }),
-      );
-      return NextResponse.json(
-        { error: "Failed to upload file" },
-        { status: 500 },
-      );
-    }
-  },
-);
-
-export const DELETE = withEvlog(
-  async (request: NextRequest): Promise<NextResponse> => {
-    const log = useLogger();
-    const head = await headers();
-    const session = await auth.api.getSession({ headers: head });
-    if (!session) {
-      return NextResponse.json(
-        { error: "User session does not exist" },
-        { status: 401 },
-      );
-    }
-    log.set({ user: session.user.id });
-
-    const schema = z.object({
-      id: z.string().min(1),
-    });
-    const data = await request.formData();
-    const parsedData = schema.safeParse({ id: data.get("id") });
-    if (!parsedData.success) {
-      return NextResponse.json(
-        { error: z.treeifyError(parsedData.error) },
-        { status: 400 },
-      );
-    }
-    log.set({ id: parsedData.data.id });
-
-    const key = await db
-      .delete(mediaTable)
-      .where(
-        and(
-          eq(mediaTable.id, parsedData.data.id),
-          eq(mediaTable.owner, session.user.id),
-        ),
+    const data = await req.formData();
+    const file = data.get("file") as File;
+    if (
+      !(
+        ["image/png", "image/jpeg", "image/gif"].includes(file.type) &&
+        file.size < 10 * 1024 * 1024
       )
-      .returning({ key: mediaTable.key });
-
-    if (!key[0]) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    ) {
+      log.error({ error: "File validation failed" });
+      return NextResponse.json(
+        {
+          error: "Invalid file, must be png, jpeg, gif smaller than 10mb",
+          request: log.getId(),
+        },
+        {
+          status: 400,
+        },
+      );
     }
+    log.info({ file: `${file.name}-${file.size}-${file.type}` });
 
-    log.set({ key: key[0].key });
+    const key = await s3Ops.createEntry({ file, log });
+    if (!key.value.success)
+      return NextResponse.json({
+        error: key.value.error,
+        request: log.getId(),
+      });
 
-    await s3.send(
-      new DeleteObjectCommand({
-        Bucket: env.S3_BUCKET,
-        Key: key[0].key,
-      }),
+    const mediaTableLog = await drizzleOps.insert(
+      mediaTable,
+      {
+        key: key.value.data,
+        owner: session.user.id,
+      },
+      log,
     );
 
+    if (!mediaTableLog.value.success) {
+      (await s3Ops.deleteEntry({ key: key.value.data, log: log })).mapError(
+        () =>
+          log.error({
+            error: "media table log failed, s3 delete failed as well",
+          }),
+      );
+      return NextResponse.json(
+        {
+          error: mediaTableLog.value.error,
+          request: log.getId(),
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
     return NextResponse.json(
-      { log: "successfully deleted file" },
+      { id: mediaTableLog.value.data.id, request: log.getId() },
       { status: 200 },
     );
-  },
-);
+  } catch {
+    log.error({ error: "Internal Server error" });
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        request: log.getId(),
+      },
+      { status: 500 },
+    );
+  } finally {
+    log.print();
+  }
+}

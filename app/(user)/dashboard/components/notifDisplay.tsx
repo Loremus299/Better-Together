@@ -5,32 +5,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { notificationService } from "@/app/api/notification/service";
-import { db } from "@/db";
-import { userId } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import { IconBell, IconCircleFilled } from "@tabler/icons-react";
 import NotifMarkButton from "./notifMarkButton";
 import { cn } from "@/lib/utils";
+import { getSession } from "@/lib/server-util";
+import { Logger } from "@/lib/logger";
 
 export default async function NotifDisplay() {
-  const user = await userId();
-  if (!user.success) {
+  const log = new Logger();
+
+  const session = await getSession();
+  if (!session) {
     redirect("/auth/login");
   }
-  const notifs = await notificationService.readNotificationsByUser({
-    user: user.data,
-    tx: db,
-  });
 
-  if (!notifs.success) {
-    redirect(`/error?e=${notifs.error}`);
+  const notifs = await notificationService.readByUser({
+    user: session.user.id,
+    log,
+  });
+  if (!notifs.value.success) {
+    log.print();
+    redirect(`/error?e=${notifs.value.error}&id=${log.getId()}`);
   }
 
+  log.print();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full h-full grid place-items-center">
         <IconBell stroke={1} />
-        {notifs.data.filter((item) => item.read === false).length > 0 && (
+        {notifs.value.data.filter((item) => item.read === false).length > 0 && (
           <div className="absolute">
             <div className="relative top-2 left-2">
               <IconCircleFilled className="text-red-500 size-4" />
@@ -40,8 +44,8 @@ export default async function NotifDisplay() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="max-w-sm w-full">
         <DropdownMenuGroup>
-          {notifs.data.reverse().map((item) => (
-            <div className="p-2 font-medium" key={item.id}>
+          {notifs.value.data.reverse().map((item) => (
+            <div className="p-2 font-medium grid gap-1" key={item.id}>
               <div className="flex items-center justify-between">
                 <p
                   className={cn(

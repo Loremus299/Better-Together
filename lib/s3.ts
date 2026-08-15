@@ -2,8 +2,8 @@ import { env } from "@/env";
 import { S3Client } from "@aws-sdk/client-s3";
 
 export const s3 = new S3Client({
-  region: "us-east-1",
-  endpoint: "http://localhost:9000",
+  region: env.S3_REGION,
+  endpoint: env.S3_ENDPOINT,
   forcePathStyle: true,
   credentials: {
     accessKeyId: env.S3_ACCESSKEYID,

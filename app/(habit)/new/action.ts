@@ -1,52 +1,36 @@
 "use server";
 
-import { withEvlog } from "@/lib/evlog";
 import { habitService } from "@/app/api/habit/service";
-import { db } from "@/db";
-import { isError, isOk, Result } from "@/lib/result";
+import { Logger } from "@/lib/logger";
+import { Result, ResultType } from "@/lib/result";
+import { getSession } from "@/lib/server-util";
 
-export const CreateHabitAction = withEvlog(
-  async ({
-    name,
-    description,
-    admin,
-    log,
-  }: {
-    name: string;
-    description: string;
-    admin: string;
-    log: string;
-  }): Promise<Result<string, string>> => {
-    const habit = await habitService.createHabit({
-      name,
-      description,
-      admin,
-      header: log,
-      tx: db,
-    });
-
-    if (!habit.success) {
-      return isError(habit.error);
+export async function createHabitAction({
+  name,
+  description,
+}: {
+  name: string;
+  description: string;
+}): Promise<ResultType<string, string>> {
+  const log = new Logger();
+  log.trace({ layer: "Create habit action" });
+  log.debug({ name, description });
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<string, string>("Session not found").type();
     }
+    log.info({ user: session.user.id });
 
-    await db.transaction(async (tx) => {
-      await habitService.createTask({
-        habitId: habit.data,
-        taskName: "Create tasks.",
-        taskDescription: "Create habits you are going to do everyday.",
-        userId: admin,
-        tx,
-      });
-      await habitService.createTask({
-        habitId: habit.data,
-        taskName: "Invite your partners.",
-        taskDescription:
-          "Invite people to hold you accountable and work together.",
-        userId: admin,
-        tx,
-      });
-    });
-
-    return isOk(habit.data);
-  },
-);
+    return (
+      await habitService.create({
+        user: session.user.id,
+        name,
+        description,
+        log,
+      })
+    ).type();
+  } finally {
+    log.print();
+  }
+}

@@ -1,18 +1,15 @@
-import { userId } from "@/lib/server-util";
 import CreateHabitForm from "./page.client";
-import { redirect } from "next/navigation";
 
-export default async function Page() {
-  const id = await userId();
-
-  if (!id.success) {
-    redirect("/auth/login");
-  }
-
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ name: string; description: string }>;
+}) {
+  const { name, description } = await searchParams;
   return (
-    <div className="min-h-screen grid place-items-center">
+    <div className="w-full min-h-screen grid place-items-center">
       <div className="w-full max-w-sm">
-        <CreateHabitForm admin={id.data} />
+        <CreateHabitForm name={name ?? ""} description={description ?? ""} />
       </div>
     </div>
   );

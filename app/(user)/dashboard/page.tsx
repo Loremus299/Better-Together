@@ -4,10 +4,17 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import HabitDisplay from "./components/habitDisplay";
 import NotifDisplay from "./components/notifDisplay";
+import { getSession } from "@/lib/server-util";
+import { redirect } from "next/navigation";
+import HabitDisplay from "./components/habitDisplay";
 
-export default function Page() {
+export default async function Page() {
+  const session = await getSession();
+  if (!session) {
+    redirect("auth/login");
+  }
+
   return (
     <MaxWContainer>
       <main className="border">
@@ -46,7 +53,9 @@ export default function Page() {
                 defaultSize={"70%"}
                 className="hover:border hover:border-chart-2"
               >
-                <HabitDisplay />
+                <div className="h-full w-full grid place-items-center">
+                  <HabitDisplay />
+                </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel>

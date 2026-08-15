@@ -1,28 +1,44 @@
 "use server";
 
 import { notificationService } from "@/app/api/notification/service";
-import { db } from "@/db";
-import { withEvlog } from "@/lib/evlog";
-import { isError, isOk, Result } from "@/lib/result";
-import { userId } from "@/lib/server-util";
+import { Logger } from "@/lib/logger";
+import { Result, ResultType } from "@/lib/result";
+import { getSession } from "@/lib/server-util";
 
-export const markNotificationAsReadAction = withEvlog(
-  async (id: string): Promise<Result<null, string>> => {
-    const user = await userId();
-    if (!user.success) {
-      return isError("Could not get your user id");
+export async function markNotificationAsReadAction(
+  id: string,
+): Promise<ResultType<undefined, { error: string; request: string }>> {
+  const log = new Logger();
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      log.error({ error: "No user session found" });
+      return Result.error<undefined, { error: string; request: string }>({
+        error: "No user session found",
+        request: log.getId(),
+      }).type();
     }
 
-    const req = await notificationService.updateNotificationAsRead({
-      id,
-      user: user.data,
-      tx: db,
-    });
-
-    if (!req.success) {
-      return isError(req.error);
+    const notif = await notificationService.readById({ id, log });
+    if (!notif.value.success) {
+      return Result.error<undefined, { error: string; request: string }>({
+        error: "No notification found",
+        request: log.getId(),
+      }).type();
     }
 
-    return isOk(null);
-  },
-);
+    if (notif.value.data.user !== session.user.id) {
+      return Result.error<undefined, { error: string; request: string }>({
+        error: "You can't mutate this notification",
+        request: log.getId(),
+      }).type();
+    }
+
+    return (await notificationService.markNotifRead({ id, log }))
+      .mapError((e) => ({ error: e, request: log.getId() }))
+      .type();
+  } finally {
+    log.print();
+  }
+}

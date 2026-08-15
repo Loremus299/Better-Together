@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { z } from "zod";
-import { formSchema } from "./common";
+import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
@@ -15,17 +14,28 @@ import FormController from "@/components/formController";
 import { useState } from "react";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
 
+export const formSchema = z.object({
+  email: z.email(),
+  password: z.string().min(8),
+});
+
 type FormValues = z.infer<typeof formSchema>;
 
-export default function LoginForm() {
+export default function LoginForm({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email,
+      password,
     },
   });
 
@@ -45,7 +55,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-2">
       <FieldGroup>
         <FormController
           form={form}

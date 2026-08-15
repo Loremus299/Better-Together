@@ -1,12 +1,8 @@
-import { userId } from "@/lib/server-util";
+import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const id = await userId();
-
-  if (!id.success) {
-    redirect("/auth/login");
-  }
-
-  redirect("/dashboard");
+  const session = await getSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  session ? redirect("/auth/login") : redirect("/dashboard");
 }

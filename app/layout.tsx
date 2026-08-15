@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
 const geistSans = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
@@ -21,9 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full ${geistSans.variable}`}>
-      <body className="antialiased">
+      <body className="antialiased dark">
         <Toaster position={"top-center"} />
-        <TooltipProvider>{children}</TooltipProvider>
+        {children}
       </body>
     </html>
   );
