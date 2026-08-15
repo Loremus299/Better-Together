@@ -123,3 +123,42 @@ export async function deleteHabitAction({
     log.print();
   }
 }
+
+export async function addMemberAction({
+  habit,
+  email,
+}: {
+  habit: string;
+  email: string;
+}) {
+  const log = new Logger();
+  log.trace({ layer: "add member by email action" });
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<void, string>("No user session found").type();
+    }
+
+    const isAdmin = await habitOps.isUserAdmin({
+      user: session.user.id,
+      habit,
+      log,
+    });
+    if (!isAdmin.value.success) {
+      return Result.error<void, string>(
+        "Could not determine authority over action",
+      ).type();
+    }
+
+    if (!isAdmin.value.data) {
+      return Result.error<void, string>(
+        "You don't have authority to perform this action",
+      ).type();
+    }
+
+    return (await habitService.addMember({ habit, email, log })).type();
+  } finally {
+    log.print();
+  }
+}
