@@ -165,10 +165,10 @@ export async function addMemberAction({
 
 export async function removeMemberAction({
   habit,
-  member,
+  email,
 }: {
   habit: string;
-  member: string;
+  email: string;
 }) {
   const log = new Logger();
   log.trace({ layer: "remove member by user id action" });
@@ -197,7 +197,7 @@ export async function removeMemberAction({
     }
 
     return (
-      await habitService.removeMemberById({ habit, log, user: member })
+      await habitService.removeMemberByEmail({ habit, log, email })
     ).type();
   } finally {
     log.print();

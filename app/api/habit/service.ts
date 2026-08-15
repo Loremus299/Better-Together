@@ -206,7 +206,11 @@ async function readMembersByHabit({
   log.info({ habit });
   const members = await drizzleOps.readAllWithCondition(
     habitMembersTable,
-    (habitMembersTable) => eq(habitMembersTable.habit, habit),
+    (habitMembersTable) =>
+      and(
+        eq(habitMembersTable.habit, habit),
+        eq(habitMembersTable.role, "member"),
+      ),
     log,
   );
 
@@ -230,23 +234,36 @@ async function readMembersByHabit({
   return Result.ok(userDetails);
 }
 
-async function removeMemberById({
+async function removeMemberByEmail({
   habit,
-  user,
+  email,
   log,
 }: {
   habit: string;
-  user: string;
+  email: string;
   log: Logger;
 }) {
   log.trace({ layer: "habit service remove member by id" });
-  log.info({ habit, user });
+  log.info({ habit, email });
+
+  const userDetails = await drizzleOps.readWithCondition(
+    user,
+    (user) => eq(user.email, email),
+    log,
+  );
+
+  if (!userDetails.value.success) {
+    return Result.error(userDetails.value.error);
+  }
+
+  const x = userDetails.value.data;
+
   return await drizzleOps.remove(
     habitMembersTable,
     (habitMembersTable) =>
       and(
         eq(habitMembersTable.habit, habit),
-        eq(habitMembersTable.member, user),
+        eq(habitMembersTable.member, x.id),
         eq(habitMembersTable.role, "member"),
       ),
     log,
@@ -263,5 +280,5 @@ export const habitService = {
 
   addMember,
   readMembersByHabit,
-  removeMemberById,
+  removeMemberByEmail,
 };

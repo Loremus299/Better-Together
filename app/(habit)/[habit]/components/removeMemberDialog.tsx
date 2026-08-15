@@ -15,10 +15,11 @@ import {
 import FormController from "@/components/formController";
 import { Button } from "@/components/ui/button";
 import { IconMailMinus } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 
 const removeFormSchema = z.object({
   habit: z.string().min(1),
-  member: z.string().min(1),
+  email: z.email(),
 });
 type RemoveFormValues = z.infer<typeof removeFormSchema>;
 
@@ -41,17 +42,19 @@ export default function RemoveMemberDialog({
     updatedAt: Date;
   }[];
 }) {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(removeFormSchema),
     defaultValues: {
       habit,
-      member: "",
+      email: "",
     },
   });
 
   const onSubmit = async (values: RemoveFormValues) => {
     const act = await removeMemberAction(values);
     if (act.success) {
+      router.refresh();
       toast.success("Removed member successfully");
     } else {
       toast.error(act.error);
@@ -66,7 +69,7 @@ export default function RemoveMemberDialog({
           <FormController
             form={form}
             label="Choose member to remove"
-            name="member"
+            name="email"
             placeholder=""
             render={({ field, fieldState }) => (
               <Select value={field.value} onValueChange={field.onChange}>
@@ -79,7 +82,7 @@ export default function RemoveMemberDialog({
                 <SelectContent>
                   <SelectGroup>
                     {members.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
+                      <SelectItem key={member.id} value={member.email}>
                         {member.name}
                       </SelectItem>
                     ))}
