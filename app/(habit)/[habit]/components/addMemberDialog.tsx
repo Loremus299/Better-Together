@@ -60,7 +60,7 @@ export default function AddMemberDialog({
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
-                type="email"
+                type="new-email"
               />
             )}
           />

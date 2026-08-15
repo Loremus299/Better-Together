@@ -1,11 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { IconPencil, IconPhotoPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconMailPlus,
+  IconPencil,
+  IconPhotoPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useState } from "react";
 import UpdateDetailsDialog from "./updateDetailsDialog";
 import UpdateHeaderDialog from "./updateHeaderDialog";
 import DeleteHabitAlert from "./deleteHabitDialog";
+import AddMemberDialog from "./addMemberDialog";
 
 export default function HabitAdminSettings({
   name,
@@ -19,6 +25,7 @@ export default function HabitAdminSettings({
   const [updateDetailsOpen, setUpdateDetailsOpen] = useState(false);
   const [updateHeaderOpen, setUpdateHeaderOpen] = useState(false);
   const [deleteHabitOpen, setDeleteHabitOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
 
   return (
     <div>
@@ -36,6 +43,14 @@ export default function HabitAdminSettings({
         onClick={() => setUpdateHeaderOpen(true)}
       >
         <IconPhotoPlus />
+      </Button>
+
+      <Button
+        variant={"ghost"}
+        className="border hover:border-accent border-muted-background rounded-none"
+        onClick={() => setAddMemberOpen(true)}
+      >
+        <IconMailPlus />
       </Button>
 
       <Button
@@ -64,6 +79,13 @@ export default function HabitAdminSettings({
         open={deleteHabitOpen}
         onOpenChange={setDeleteHabitOpen}
         habit={habit}
+      />
+
+      <AddMemberDialog
+        email=""
+        habit={habit}
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
       />
     </div>
   );
