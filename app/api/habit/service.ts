@@ -1,4 +1,9 @@
-import { habitMembersTable, habitTable, habitTasksTable } from "@/db/schema";
+import {
+  habitMembersTable,
+  habitTable,
+  habitTasksTable,
+  user,
+} from "@/db/schema";
 import { drizzleOps } from "../ops/drizzle";
 import { Logger } from "@/lib/logger";
 import { eq, InferSelectModel } from "drizzle-orm";
@@ -163,6 +168,49 @@ async function deleteHabit({ habit, log }: { habit: string; log: Logger }) {
   );
 }
 
+async function addMember({
+  habit,
+  email,
+  log,
+}: {
+  habit: string;
+  email: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service add member" });
+  log.info({ habit, email });
+  const userDetails = await drizzleOps.readWithCondition(
+    user,
+    (user) => eq(user.email, email),
+    log,
+  );
+
+  if (!userDetails.value.success)
+    return Result.error("Could not get data about user");
+
+  return await drizzleOps.insert(
+    habitMembersTable,
+    { habit, member: userDetails.value.data.id, role: "member" },
+    log,
+  );
+}
+
+async function readMembersByHabit({
+  habit,
+  log,
+}: {
+  habit: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service read member by id" });
+  log.info({ habit });
+  return await drizzleOps.readWithCondition(
+    habitMembersTable,
+    (habitMembersTable) => eq(habitMembersTable.habit, habit),
+    log,
+  );
+}
+
 export const habitService = {
   create,
   readHabitsByUser,
@@ -170,4 +218,7 @@ export const habitService = {
   updateHeader,
   updateHabit,
   deleteHabit,
+
+  addMember,
+  readMembersByHabit,
 };
