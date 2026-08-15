@@ -14,7 +14,6 @@ export async function updateDetailsAction({
   name: string;
   description: string;
   habit: string;
-  user: string;
 }): Promise<ResultType<void, string>> {
   const log = new Logger();
   log.trace({ layer: "update details of habit action" });
@@ -93,7 +92,6 @@ export async function deleteHabitAction({
   habit,
 }: {
   habit: string;
-  user: string;
 }): Promise<ResultType<void, string>> {
   const log = new Logger();
   log.trace({ layer: "delete habit action" });

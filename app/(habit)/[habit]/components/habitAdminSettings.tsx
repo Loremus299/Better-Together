@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { IconPencil, IconPhotoPlus } from "@tabler/icons-react";
+import { IconPencil, IconPhotoPlus, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import UpdateDetailsDialog from "./updateDetailsDialog";
 import UpdateHeaderDialog from "./updateHeaderDialog";
+import DeleteHabitAlert from "./deleteHabitDialog";
 
 export default function HabitAdminSettings({
   name,
@@ -17,6 +18,7 @@ export default function HabitAdminSettings({
 }) {
   const [updateDetailsOpen, setUpdateDetailsOpen] = useState(false);
   const [updateHeaderOpen, setUpdateHeaderOpen] = useState(false);
+  const [deleteHabitOpen, setDeleteHabitOpen] = useState(false);
 
   return (
     <div>
@@ -27,12 +29,21 @@ export default function HabitAdminSettings({
       >
         <IconPencil />
       </Button>
+
       <Button
         variant={"ghost"}
         className="border hover:border-accent border-muted-background rounded-none"
         onClick={() => setUpdateHeaderOpen(true)}
       >
         <IconPhotoPlus />
+      </Button>
+
+      <Button
+        variant={"ghost"}
+        className="border hover:border-accent border-muted-background rounded-none"
+        onClick={() => setDeleteHabitOpen(true)}
+      >
+        <IconTrash className="text-destructive" />
       </Button>
 
       <UpdateDetailsDialog
@@ -47,6 +58,12 @@ export default function HabitAdminSettings({
         habit={habit}
         open={updateHeaderOpen}
         onOpenChange={setUpdateHeaderOpen}
+      />
+
+      <DeleteHabitAlert
+        open={deleteHabitOpen}
+        onOpenChange={setDeleteHabitOpen}
+        habit={habit}
       />
     </div>
   );
