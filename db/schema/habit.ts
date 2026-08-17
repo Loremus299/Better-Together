@@ -60,8 +60,11 @@ export const habitProofsTable = pgTable("habitProofs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  habit: text("habit")
-    .references(() => habitTable.id, { onDelete: "cascade" })
+  task: text("task")
+    .references(() => habitTasksTable.id, { onDelete: "cascade" })
+    .notNull(),
+  user: text("user")
+    .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   timeStamp: text("timestamp").$defaultFn(() =>
     Math.floor(Date.now() / 1000).toString(),
