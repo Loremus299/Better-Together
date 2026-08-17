@@ -282,10 +282,72 @@ async function addTaskInHabit({
   log: Logger;
 }) {
   log.trace({ layer: "habit service add task in habit" });
+  log.info({ habit, task, description });
 
   return await drizzleOps.insert(
     habitTasksTable,
     { task, description, habit },
+    log,
+  );
+}
+
+async function readTasksByHabit({
+  habit,
+  log,
+}: {
+  habit: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service read tasks by habit" });
+  log.info({ habit });
+
+  return await drizzleOps.readAllWithCondition(
+    habitTasksTable,
+    (habitTasksTable) => eq(habitTasksTable.habit, habit),
+    log,
+  );
+}
+
+async function readTaskById({ id, log }: { id: string; log: Logger }) {
+  log.trace({ layer: "habit service read tasks by habit" });
+  log.info({ id });
+
+  return await drizzleOps.readWithCondition(
+    habitTasksTable,
+    (habitTasksTable) => eq(habitTasksTable.id, id),
+    log,
+  );
+}
+
+async function updateTask({
+  task,
+  description,
+  id,
+  log,
+}: {
+  task: string;
+  description: string;
+  id: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service update task" });
+  log.info({ id, task, description });
+
+  return await drizzleOps.update(
+    habitTasksTable,
+    { task, description },
+    (habitTasksTable) => eq(habitTasksTable.id, id),
+    log,
+  );
+}
+
+async function deleteTask({ id, log }: { id: string; log: Logger }) {
+  log.trace({ layer: "habit service delete task" });
+  log.info({ id });
+
+  return await drizzleOps.remove(
+    habitTasksTable,
+    (habitTasksTable) => eq(habitTasksTable.id, id),
     log,
   );
 }
@@ -303,4 +365,8 @@ export const habitService = {
   removeMemberByEmail,
 
   addTaskInHabit,
+  readTasksByHabit,
+  readTaskById,
+  updateTask,
+  deleteTask,
 };
