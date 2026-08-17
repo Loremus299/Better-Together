@@ -270,6 +270,26 @@ async function removeMemberByEmail({
   );
 }
 
+async function addTaskInHabit({
+  task,
+  description,
+  habit,
+  log,
+}: {
+  task: string;
+  description: string;
+  habit: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service add task in habit" });
+
+  return await drizzleOps.insert(
+    habitTasksTable,
+    { task, description, habit },
+    log,
+  );
+}
+
 export const habitService = {
   create,
   readHabitsByUser,
@@ -281,4 +301,6 @@ export const habitService = {
   addMember,
   readMembersByHabit,
   removeMemberByEmail,
+
+  addTaskInHabit,
 };
