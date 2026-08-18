@@ -65,7 +65,7 @@ export default async function Page({
           <ResizablePanel defaultSize={"96px"}>
             {isAdmin.value.data ? (
               <ResizablePanelGroup>
-                <ResizablePanel>
+                <ResizablePanel className="hover:border hover:border-chart-2">
                   <div className="w-full h-full p-4 flex gap-4">
                     {habitdata.value.data.header && (
                       <ImageById
@@ -84,7 +84,10 @@ export default async function Page({
                   </div>
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={"76px"}>
+                <ResizablePanel
+                  defaultSize={"78px"}
+                  className="hover:border hover:border-chart-2"
+                >
                   <HabitAdminSettings
                     name={habitdata.value.data.name}
                     description={habitdata.value.data.description}
@@ -115,9 +118,14 @@ export default async function Page({
           <ResizableHandle withHandle />
           <ResizablePanel>
             <ResizablePanelGroup>
-              <ResizablePanel defaultSize={"75%"}></ResizablePanel>
+              <ResizablePanel
+                defaultSize={"75%"}
+                className="hover:border hover:border-chart-2"
+              ></ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel>Hi</ResizablePanel>
+              <ResizablePanel className="hover:border hover:border-chart-2">
+                Hi
+              </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
