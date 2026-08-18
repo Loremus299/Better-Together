@@ -9,6 +9,7 @@ import { drizzleOps } from "../ops/drizzle";
 import { Logger } from "@/lib/logger";
 import { and, eq, InferSelectModel } from "drizzle-orm";
 import { Result } from "@/lib/result";
+import { notifOps } from "../ops/notification";
 
 async function create({
   user,
@@ -281,15 +282,46 @@ async function addTaskInHabit({
   description: string;
   habit: string;
   log: Logger;
-}) {
+}): Promise<
+  Result<
+    {
+      id: string;
+      habit: string;
+      description: string;
+      createdAt: Date;
+      updatedAt: Date;
+      task: string;
+    },
+    string
+  >
+> {
   log.trace({ layer: "habit service add task in habit" });
   log.info({ habit, task, description });
 
-  return await drizzleOps.insert(
+  const taskDetails = await drizzleOps.insert(
     habitTasksTable,
     { task, description, habit },
     log,
   );
+
+  if (!taskDetails.value.success) return Result.error(taskDetails.value.error);
+
+  const members = await readMembersByHabit({ habit, log });
+  const habitData = await readHabit({ habit, log });
+
+  if (!members.value.success) return Result.error(members.value.error);
+  if (!habitData.value.success) return Result.error(habitData.value.error);
+
+  for (const member of members.value.data) {
+    await notifOps.addNotif({
+      user: member.id,
+      title: `Task added in ${habitData.value.data.name}`,
+      body: `Admin added task ${task} in ${habitData.value.data.name}`,
+      log,
+    });
+  }
+
+  return Result.ok(taskDetails.value.data);
 }
 
 async function readTasksByHabit({
