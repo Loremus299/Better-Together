@@ -1,11 +1,11 @@
 import { habitService } from "@/app/api/habit/service";
 import { Logger } from "@/lib/logger";
 import { getSession } from "@/lib/server-util";
-import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import UpdateTaskDialog from "./updateTaskDialog";
 import { habitOps } from "@/app/api/ops/habit";
 import AddProofDialog from "./addProofDialog";
+import TaskDisplayClient from "./taskDisplayClient";
 
 export default async function TaskDisplay({
   task,
@@ -38,20 +38,14 @@ export default async function TaskDisplay({
     );
   }
 
+  const userArr = proof.value.data
+    .filter((i) => i.user === session.user.id)
+    .sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
+
   return (
     <div>
       <div className="flex justify-between">
-        <h3
-          className={cn(
-            "tracking-tight font-semibold",
-            proof.value.data.filter((i) => i.user == session.user.id).length ===
-              0
-              ? ""
-              : "line-through text-muted-foreground",
-          )}
-        >
-          {name}
-        </h3>
+        <TaskDisplayClient proofTime={userArr[0].timeStamp} task={name} />
         <div className="flex gap-2">
           {!isAdmin.value.data && (
             <UpdateTaskDialog description={description} task={name} id={task} />
