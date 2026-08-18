@@ -100,7 +100,7 @@ export default async function Page({
                 </ResizablePanel>
               </ResizablePanelGroup>
             ) : (
-              <div className="w-full h-full p-4 flex gap-4">
+              <div className="w-full h-full p-4 flex gap-4 hover:border hover:border-chart-2">
                 {habitdata.value.data.header && (
                   <ImageById
                     id={habitdata.value.data.header}

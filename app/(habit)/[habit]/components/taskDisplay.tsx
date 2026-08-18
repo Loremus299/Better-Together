@@ -53,7 +53,7 @@ export default async function TaskDisplay({
           {name}
         </h3>
         <div className="flex gap-2">
-          {isAdmin && (
+          {!isAdmin.value.data && (
             <UpdateTaskDialog description={description} task={name} id={task} />
           )}
           <AddProofDialog description="" id={task} />

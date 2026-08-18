@@ -17,6 +17,7 @@ import FormController from "@/components/formController";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 
 const addProofSchema = z.object({
   id: z.string().min(1),
@@ -106,7 +107,7 @@ export default function AddProofDialog({
             name="description"
             placeholder="Describe your proof"
             render={({ field, fieldState, placeholder }) => (
-              <Input
+              <Textarea
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
