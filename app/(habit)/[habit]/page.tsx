@@ -11,6 +11,7 @@ import { Logger } from "@/lib/logger";
 import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import HabitAdminSettings from "./components/habitAdminSettings";
+import TaskDisplay from "./components/taskDisplay";
 
 export default async function Page({
   params,
@@ -37,12 +38,14 @@ export default async function Page({
   });
   const habitdata = await habitService.readHabit({ habit, log });
   const members = await habitService.readMembersByHabit({ habit, log });
+  const tasks = await habitService.readTasksByHabit({ habit, log });
 
   if (
     !isAdmin.value.success ||
     !isMember.value.success ||
     !habitdata.value.success ||
-    !members.value.success
+    !members.value.success ||
+    !tasks.value.success
   ) {
     log.print();
     redirect(
@@ -121,7 +124,18 @@ export default async function Page({
               <ResizablePanel
                 defaultSize={"75%"}
                 className="hover:border hover:border-chart-2"
-              ></ResizablePanel>
+              >
+                <div className="p-4 grid gap-4">
+                  {tasks.value.data.map((task) => (
+                    <TaskDisplay
+                      key={task.id}
+                      task={task.id}
+                      description={task.description}
+                      name={task.task}
+                    />
+                  ))}
+                </div>
+              </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel className="hover:border hover:border-chart-2">
                 Hi

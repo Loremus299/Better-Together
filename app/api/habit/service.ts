@@ -440,9 +440,9 @@ async function createProof({
 
 async function readProofsByTask({ task, log }: { task: string; log: Logger }) {
   log.trace({ layer: "habit service read proofs by task" });
-  log.info({ user, task });
+  log.info({ task });
 
-  return await drizzleOps.readWithCondition(
+  return await drizzleOps.readAllWithCondition(
     habitProofsTable,
     (habitProofsTable) => eq(habitProofsTable.task, task),
     log,
