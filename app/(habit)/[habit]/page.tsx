@@ -12,6 +12,8 @@ import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import HabitAdminSettings from "./components/habitAdminSettings";
 import TaskDisplay from "./components/taskDisplay";
+import { InferSelectModel } from "drizzle-orm";
+import { habitProofsTable } from "@/db/schema";
 
 export default async function Page({
   params,
@@ -51,6 +53,15 @@ export default async function Page({
     redirect(
       `/error?e=${encodeURI("Failed to load initial data")}&id=${log.getId()}`,
     );
+  }
+
+  const proofArr: InferSelectModel<typeof habitProofsTable>[] = [];
+
+  for (const task of tasks.value.data) {
+    const proof = await habitService.readProofsByTask({ task: task.id, log });
+    if (proof.value.success) {
+      proof.value.data.forEach((item) => proofArr.push(item));
+    }
   }
 
   if (!isAdmin.value.data && !isMember.value.data) {
@@ -139,7 +150,9 @@ export default async function Page({
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel className="hover:border hover:border-chart-2">
-                Hi
+                {proofArr.map((item) => (
+                  <div key={item.id}>{item.proofStatus}</div>
+                ))}
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
