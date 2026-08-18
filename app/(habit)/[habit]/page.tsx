@@ -128,6 +128,7 @@ export default async function Page({
                 <div className="p-4 grid gap-4">
                   {tasks.value.data.map((task) => (
                     <TaskDisplay
+                      habit={habit}
                       key={task.id}
                       task={task.id}
                       description={task.description}

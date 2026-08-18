@@ -4,14 +4,18 @@ import { getSession } from "@/lib/server-util";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import UpdateTaskDialog from "./updateTaskDialog";
+import { habitOps } from "@/app/api/ops/habit";
+import AddProofDialog from "./addProofDialog";
 
 export default async function TaskDisplay({
   task,
   name,
+  habit,
   description,
 }: {
   task: string;
   name: string;
+  habit: string;
   description: string;
 }) {
   const log = new Logger();
@@ -21,8 +25,13 @@ export default async function TaskDisplay({
     redirect("/auth/login");
   }
   const proof = await habitService.readProofsByTask({ task, log });
+  const isAdmin = await habitOps.isUserMember({
+    user: session.user.id,
+    habit,
+    log,
+  });
 
-  if (!proof.value.success) {
+  if (!proof.value.success || !isAdmin.value.success) {
     log.print();
     redirect(
       `/error?e=${encodeURI("Failed to load initial data")}&id=${log.getId()}`,
@@ -43,7 +52,12 @@ export default async function TaskDisplay({
         >
           {name}
         </h3>
-        <UpdateTaskDialog description={description} task={name} id={task} />
+        <div className="flex gap-2">
+          {isAdmin && (
+            <UpdateTaskDialog description={description} task={name} id={task} />
+          )}
+          <AddProofDialog description="" id={task} />
+        </div>
       </div>
       <p className="text-muted-foreground">{description}</p>
     </div>
