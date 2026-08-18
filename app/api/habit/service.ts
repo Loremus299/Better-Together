@@ -386,27 +386,81 @@ async function updateTask({
   description: string;
   id: string;
   log: Logger;
-}) {
+}): Promise<Result<undefined, string>> {
   log.trace({ layer: "habit service update task" });
   log.info({ id, task, description });
 
-  return await drizzleOps.update(
+  const oldtask = await readTaskById({ id, log });
+
+  const updateTask = await drizzleOps.update(
     habitTasksTable,
     { task, description },
     (habitTasksTable) => eq(habitTasksTable.id, id),
     log,
   );
+
+  if (!oldtask.value.success) return Result.error(oldtask.value.error);
+  if (!updateTask.value.success) return Result.error(updateTask.value.error);
+
+  const members = await readMembersByHabit({
+    habit: oldtask.value.data.habit,
+    log,
+  });
+  const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
+
+  if (!members.value.success) return Result.error(members.value.error);
+  if (!habitData.value.success) return Result.error(habitData.value.error);
+
+  for (const member of members.value.data) {
+    await notifOps.addNotif({
+      user: member.id,
+      title: `Task updated in "${habitData.value.data.name}"`,
+      body: `Admin added task "${task}" in "${habitData.value.data.name}". Might wanna check it out ( ◡̀_◡́)ᕤ`,
+      log,
+    });
+  }
+  return Result.ok(undefined);
 }
 
-async function deleteTask({ id, log }: { id: string; log: Logger }) {
+async function deleteTask({
+  id,
+  log,
+}: {
+  id: string;
+  log: Logger;
+}): Promise<Result<undefined, string>> {
   log.trace({ layer: "habit service delete task" });
   log.info({ id });
 
-  return await drizzleOps.remove(
+  const oldtask = await readTaskById({ id, log });
+
+  const deleteTask = await drizzleOps.remove(
     habitTasksTable,
     (habitTasksTable) => eq(habitTasksTable.id, id),
     log,
   );
+
+  if (!oldtask.value.success) return Result.error(oldtask.value.error);
+  if (!deleteTask.value.success) return Result.error(deleteTask.value.error);
+
+  const members = await readMembersByHabit({
+    habit: oldtask.value.data.habit,
+    log,
+  });
+  const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
+
+  if (!members.value.success) return Result.error(members.value.error);
+  if (!habitData.value.success) return Result.error(habitData.value.error);
+
+  for (const member of members.value.data) {
+    await notifOps.addNotif({
+      user: member.id,
+      title: `Task deleted in "${habitData.value.data.name}"`,
+      body: `Admin deleted task "${oldtask.value.data.task}" in "${habitData.value.data.name}". Less work now ٩>ᴗ<)و`,
+      log,
+    });
+  }
+  return Result.ok(undefined);
 }
 
 async function createProof({
