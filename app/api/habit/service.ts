@@ -503,6 +503,17 @@ async function readProofsByTask({ task, log }: { task: string; log: Logger }) {
   );
 }
 
+async function readProofById({ id, log }: { id: string; log: Logger }) {
+  log.trace({ layer: "habit service read proof by id" });
+  log.info({ id });
+
+  return await drizzleOps.readWithCondition(
+    habitProofsTable,
+    (habitProofsTable) => eq(habitProofsTable.id, id),
+    log,
+  );
+}
+
 async function userHeatmap({ user, log }: { user: string; log: Logger }) {
   log.trace({ layer: "habit service read user heatmap" });
   log.info({ user });
@@ -560,6 +571,7 @@ export const habitService = {
 
   createProof,
   readProofsByTask,
+  readProofById,
   userHeatmap,
   updateProofStatus,
 };
