@@ -1,7 +1,9 @@
 "use server";
 
 import { habitService } from "@/app/api/habit/service";
+import { drizzleOps } from "@/app/api/ops/drizzle";
 import { habitOps } from "@/app/api/ops/habit";
+import { habitProofsTable } from "@/db/schema";
 import { Logger } from "@/lib/logger";
 import { Result, ResultType } from "@/lib/result";
 import { getSession } from "@/lib/server-util";
@@ -330,6 +332,130 @@ export async function deleteTaskAction({ id }: { id: string }) {
     }
 
     return (await habitService.deleteTask({ id, log })).type();
+  } finally {
+    log.print();
+  }
+}
+
+export async function createProofAction({
+  id,
+  description,
+  media,
+}: {
+  id: string;
+  description?: string;
+  media?: string;
+}) {
+  const log = new Logger();
+  log.trace({ layer: "create proof entry" });
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<void, string>("No user session found").type();
+    }
+
+    const taskDetails = await habitService.readTaskById({ id, log });
+
+    if (!taskDetails.value.success)
+      return Result.error(taskDetails.value.error).type();
+
+    const isMember = await habitOps.isUserMember({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isMember.value.success) {
+      return Result.error<void, string>(
+        "Could not determine authority over action",
+      ).type();
+    }
+
+    if (!isMember.value.data) {
+      return Result.error<void, string>(
+        "You don't have authority to perform this action",
+      ).type();
+    }
+
+    return (
+      await drizzleOps.insert(
+        habitProofsTable,
+        {
+          task: id,
+          proofStatus: "pending",
+          user: session.user.id,
+          description,
+          media,
+        },
+        log,
+      )
+    ).type();
+  } finally {
+    log.print();
+  }
+}
+
+export async function updateProofStatusAction({
+  id,
+  updatedStatus,
+}: {
+  id: string;
+  updatedStatus: boolean;
+}) {
+  const log = new Logger();
+  log.trace({ layer: "update proof entry" });
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<void, string>("No user session found").type();
+    }
+
+    const proofDetails = await habitService.readProofById({ id, log });
+
+    if (!proofDetails.value.success)
+      return Result.error(proofDetails.value.error).type();
+
+    const taskDetails = await habitService.readTaskById({
+      id: proofDetails.value.data.task,
+      log,
+    });
+
+    if (!taskDetails.value.success)
+      return Result.error(taskDetails.value.error);
+
+    const isMember = await habitOps.isUserMember({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isMember.value.success) {
+      return Result.error<void, string>(
+        "Could not determine authority over action",
+      ).type();
+    }
+
+    if (!isMember.value.data) {
+      return Result.error<void, string>(
+        "You don't have authority to perform this action",
+      ).type();
+    }
+
+    if (session.user.id === proofDetails.value.data.user) {
+      return Result.error<void, string>(
+        "WOW DUDE ??!! Cheating ???!!! BADDDDD GIRL ˙◠˙",
+      ).type();
+    }
+
+    return (
+      await habitService.updateProofStatus({
+        proof: id,
+        status: updatedStatus,
+        log,
+      })
+    ).type();
   } finally {
     log.print();
   }
