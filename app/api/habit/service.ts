@@ -178,7 +178,17 @@ async function addMember({
   habit: string;
   email: string;
   log: Logger;
-}) {
+}): Promise<
+  Result<
+    {
+      habit: string;
+      id: string;
+      role: "member" | "admin";
+      member: string;
+    },
+    string
+  >
+> {
   log.trace({ layer: "habit service add member" });
   log.info({ habit, email });
   const userDetails = await drizzleOps.readWithCondition(
@@ -190,11 +200,25 @@ async function addMember({
   if (!userDetails.value.success)
     return Result.error("Could not get data about user");
 
-  return await drizzleOps.insert(
+  const data = await drizzleOps.insert(
     habitMembersTable,
     { habit, member: userDetails.value.data.id, role: "member" },
     log,
   );
+
+  if (!data.value.success) return Result.error(data.value.error);
+
+  const habitData = await readHabit({ habit, log });
+  if (!habitData.value.success) return Result.error(habitData.value.error);
+
+  await notifOps.addNotif({
+    user: userDetails.value.data.id,
+    title: `You were added in habit "${habitData.value.data.name}"`,
+    body: "If not you, ask to removed and check how your email was added. This can be dangerous. (ᵕ•́ -•̀)",
+    log,
+  });
+
+  return Result.ok(data.value.data);
 }
 
 async function readMembersByHabit({
@@ -315,8 +339,8 @@ async function addTaskInHabit({
   for (const member of members.value.data) {
     await notifOps.addNotif({
       user: member.id,
-      title: `Task added in ${habitData.value.data.name}`,
-      body: `Admin added task ${task} in ${habitData.value.data.name}`,
+      title: `Task added in "${habitData.value.data.name}"`,
+      body: `Admin added task "${task}" in "${habitData.value.data.name}" (ó﹏ò｡) More work comes your way.`,
       log,
     });
   }

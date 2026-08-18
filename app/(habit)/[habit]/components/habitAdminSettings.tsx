@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  IconCircleCheck,
   IconMailMinus,
   IconMailPlus,
   IconPencil,
@@ -14,6 +15,7 @@ import UpdateHeaderDialog from "./updateHeaderDialog";
 import DeleteHabitAlert from "./deleteHabitDialog";
 import AddMemberDialog from "./addMemberDialog";
 import RemoveMemberDialog from "./removeMemberDialog";
+import AddTaskDialog from "./addTaskDialog";
 
 export default function HabitAdminSettings({
   name,
@@ -39,6 +41,7 @@ export default function HabitAdminSettings({
   const [deleteHabitOpen, setDeleteHabitOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [removeMemberOpen, setRemoveMemberOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   return (
     <div>
@@ -64,6 +67,14 @@ export default function HabitAdminSettings({
         onClick={() => setAddMemberOpen(true)}
       >
         <IconMailPlus />
+      </Button>
+
+      <Button
+        variant={"ghost"}
+        className="border hover:border-accent border-muted-background rounded-none"
+        onClick={() => setAddTaskOpen(true)}
+      >
+        <IconCircleCheck />
       </Button>
 
       <Button
@@ -114,6 +125,14 @@ export default function HabitAdminSettings({
         members={members}
         onOpenChange={setRemoveMemberOpen}
         open={removeMemberOpen}
+      />
+
+      <AddTaskDialog
+        description=""
+        habit={habit}
+        task=""
+        open={addTaskOpen}
+        onOpenChange={setAddTaskOpen}
       />
     </div>
   );
