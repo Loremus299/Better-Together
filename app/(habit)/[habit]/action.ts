@@ -246,3 +246,91 @@ export async function addTaskAction({
     log.print();
   }
 }
+
+export async function updateTaskAction({
+  id,
+  task,
+  description,
+}: {
+  id: string;
+  task: string;
+  description: string;
+}) {
+  const log = new Logger();
+  log.trace({ layer: "update task action" });
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<void, string>("No user session found").type();
+    }
+
+    const taskDetails = await habitService.readTaskById({ id, log });
+
+    if (!taskDetails.value.success)
+      return Result.error(taskDetails.value.error).type();
+
+    const isAdmin = await habitOps.isUserAdmin({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isAdmin.value.success) {
+      return Result.error<void, string>(
+        "Could not determine authority over action",
+      ).type();
+    }
+
+    if (!isAdmin.value.data) {
+      return Result.error<void, string>(
+        "You don't have authority to perform this action",
+      ).type();
+    }
+
+    return (
+      await habitService.updateTask({ task, description, id, log })
+    ).type();
+  } finally {
+    log.print();
+  }
+}
+
+export async function deleteTaskAction({ id }: { id: string }) {
+  const log = new Logger();
+  log.trace({ layer: "delete task action" });
+
+  try {
+    const session = await getSession();
+    if (!session) {
+      return Result.error<void, string>("No user session found").type();
+    }
+
+    const taskDetails = await habitService.readTaskById({ id, log });
+
+    if (!taskDetails.value.success)
+      return Result.error(taskDetails.value.error).type();
+
+    const isAdmin = await habitOps.isUserAdmin({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isAdmin.value.success) {
+      return Result.error<void, string>(
+        "Could not determine authority over action",
+      ).type();
+    }
+
+    if (!isAdmin.value.data) {
+      return Result.error<void, string>(
+        "You don't have authority to perform this action",
+      ).type();
+    }
+
+    return (await habitService.deleteTask({ id, log })).type();
+  } finally {
+    log.print();
+  }
+}
