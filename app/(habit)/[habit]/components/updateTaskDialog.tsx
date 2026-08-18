@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { updateTaskAction } from "../action";
+import { deleteTaskAction, updateTaskAction } from "../action";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import FormController from "@/components/formController";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -88,9 +88,25 @@ export default function UpdateTaskDialog({
               />
             )}
           />
+
           <Button type="submit">
             <IconEdit />
             Update task
+          </Button>
+          <Button
+            variant={"destructive"}
+            onClick={async () => {
+              const act = await deleteTaskAction({ id });
+              if (!act.success) {
+                toast.error(act.error);
+              } else {
+                router.refresh();
+                toast.success("Task deleted successfully");
+              }
+            }}
+          >
+            <IconTrash />
+            Delete Task
           </Button>
         </form>
       </DialogContent>
