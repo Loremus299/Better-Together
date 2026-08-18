@@ -3,6 +3,7 @@ import { Logger } from "@/lib/logger";
 import { getSession } from "@/lib/server-util";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import UpdateTaskDialog from "./updateTaskDialog";
 
 export default async function TaskDisplay({
   task,
@@ -30,16 +31,20 @@ export default async function TaskDisplay({
 
   return (
     <div>
-      <h3
-        className={cn(
-          "tracking-tight font-semibold",
-          proof.value.data.filter((i) => i.user == session.user.id).length === 0
-            ? ""
-            : "line-through text-muted-foreground",
-        )}
-      >
-        {name}
-      </h3>
+      <div className="flex justify-between">
+        <h3
+          className={cn(
+            "tracking-tight font-semibold",
+            proof.value.data.filter((i) => i.user == session.user.id).length ===
+              0
+              ? ""
+              : "line-through text-muted-foreground",
+          )}
+        >
+          {name}
+        </h3>
+        <UpdateTaskDialog description={description} task={name} id={task} />
+      </div>
       <p className="text-muted-foreground">{description}</p>
     </div>
   );
