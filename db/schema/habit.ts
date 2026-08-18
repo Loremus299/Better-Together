@@ -66,13 +66,11 @@ export const habitProofsTable = pgTable("habitProofs", {
   user: text("user")
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  timeStamp: text("timestamp").$defaultFn(() =>
-    Math.floor(Date.now() / 1000).toString(),
-  ),
+  timeStamp: text("timestamp")
+    .notNull()
+    .$defaultFn(() => Math.floor(Date.now() / 1000).toString()),
   description: text("description"),
-  media: text("media")
-    .references(() => mediaTable.id, { onDelete: "cascade" })
-    .notNull(),
+  media: text("media").references(() => mediaTable.id, { onDelete: "cascade" }),
   proofStatus: proofStatusEnum("proofStatus").notNull(),
   updatedAt: timestamp("updatedAt", { mode: "date" })
     .notNull()

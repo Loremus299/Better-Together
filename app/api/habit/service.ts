@@ -1,5 +1,6 @@
 import {
   habitMembersTable,
+  habitProofsTable,
   habitTable,
   habitTasksTable,
   user,
@@ -352,6 +353,83 @@ async function deleteTask({ id, log }: { id: string; log: Logger }) {
   );
 }
 
+async function createProof({
+  user,
+  task,
+  media,
+  description,
+  log,
+}: {
+  user: string;
+  task: string;
+  media?: string;
+  description?: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service create proof" });
+  log.info({ user, task, description, media });
+
+  return await drizzleOps.insert(
+    habitProofsTable,
+    {
+      user,
+      task,
+      media,
+      proofStatus: "pending",
+      description,
+    },
+    log,
+  );
+}
+
+async function readProofsByTask({ task, log }: { task: string; log: Logger }) {
+  log.trace({ layer: "habit service read proofs by task" });
+  log.info({ user, task });
+
+  return await drizzleOps.readWithCondition(
+    habitProofsTable,
+    (habitProofsTable) => eq(habitProofsTable.task, task),
+    log,
+  );
+}
+
+async function userHeatmap({ user, log }: { user: string; log: Logger }) {
+  log.trace({ layer: "habit service read user heatmap" });
+  log.info({ user });
+
+  return await drizzleOps.readAllWithCondition(
+    habitProofsTable,
+    (habitProofsTable) =>
+      and(
+        eq(habitProofsTable.user, user),
+        eq(habitProofsTable.proofStatus, "accepted"),
+      ),
+    log,
+  );
+}
+
+async function updateProofStatus({
+  proof,
+  status,
+  log,
+}: {
+  proof: string;
+  status: boolean;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit service update proof status" });
+  log.info({ status, proof });
+
+  return await drizzleOps.update(
+    habitProofsTable,
+    {
+      proofStatus: status ? "accepted" : "declined",
+    },
+    (habitProofsTable) => eq(habitProofsTable.id, proof),
+    log,
+  );
+}
+
 export const habitService = {
   create,
   readHabitsByUser,
@@ -369,4 +447,9 @@ export const habitService = {
   readTaskById,
   updateTask,
   deleteTask,
+
+  createProof,
+  readProofsByTask,
+  userHeatmap,
+  updateProofStatus,
 };
