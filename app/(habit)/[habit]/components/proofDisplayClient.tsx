@@ -34,7 +34,7 @@ export default function ProofDisplayClient({
   url?: string;
 }) {
   const router = useRouter();
-  const date = new Date(proofTime);
+  const date = new Date(Number(proofTime) * 1000);
   const today = new Date();
 
   const isSubmittedToday =
@@ -45,22 +45,24 @@ export default function ProofDisplayClient({
   return (
     <Card>
       <CardHeader>
-        {isSubmittedToday ? (
-          <IconStarFilled className="text-accent-foreground" />
-        ) : (
-          ""
-        )}
-        Proof submitted by {isSelf ? "You" : userName}
+        <div className="flex items-center gap-2">
+          {isSubmittedToday ? (
+            <IconStarFilled className="text-accent size-4" />
+          ) : (
+            ""
+          )}
+          Proof submitted by {isSelf ? "You" : userName}
+        </div>
         <CardDescription>
           Approval Status: {proofStatus} <br />
-          For task: {task}
+          For task: {task} <br />
+          Submitted on: {isSubmittedToday ? "today" : date.getDate()}
         </CardDescription>
       </CardHeader>
       <CardContent>{description}</CardContent>
       <CardFooter className="grid gap-2">
         <img src={url} alt={description ?? ""} className="rounded-xl" />
-
-        {isSelf ? (
+        {proofStatus !== "pending" ? null : isSelf ? (
           <Button
             onClick={async () => {
               const act = await updateProofStatusAction({

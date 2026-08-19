@@ -150,7 +150,7 @@ export default async function Page({
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel className="hover:border hover:border-chart-2 p-4">
+              <ResizablePanel className="hover:border hover:border-chart-2 p-4 flex flex-wrap gap-4">
                 {proofArr.map((item) => (
                   <ProofDisplay
                     id={item.id}
