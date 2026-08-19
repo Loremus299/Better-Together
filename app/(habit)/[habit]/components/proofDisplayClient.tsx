@@ -3,15 +3,16 @@
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { IconStarFilled } from "@tabler/icons-react";
+import { IconMoodTongueWink, IconStarFilled } from "@tabler/icons-react";
 import { updateProofStatusAction } from "../action";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function ProofDisplayClient({
   id,
@@ -32,6 +33,7 @@ export default function ProofDisplayClient({
   task: string;
   url?: string;
 }) {
+  const router = useRouter();
   const date = new Date(proofTime);
   const today = new Date();
 
@@ -53,26 +55,72 @@ export default function ProofDisplayClient({
           Approval Status: {proofStatus} <br />
           For task: {task}
         </CardDescription>
-        <CardAction
-          onClick={async () => {
-            const act = await updateProofStatusAction({
-              id,
-              updatedStatus: true,
-            });
-
-            if (!act.success) {
-              toast.error(act.error);
-            } else {
-              toast.success("Approved proof");
-            }
-          }}
-        >
-          {isSelf ? "Cheat" : "Review"}
-        </CardAction>
       </CardHeader>
       <CardContent>{description}</CardContent>
-      <CardFooter>
+      <CardFooter className="grid gap-2">
         <img src={url} alt={description ?? ""} className="rounded-xl" />
+
+        {isSelf ? (
+          <Button
+            onClick={async () => {
+              const act = await updateProofStatusAction({
+                id,
+                updatedStatus: true,
+              });
+
+              if (!act.success) {
+                toast.error(act.error);
+              } else {
+                router.refresh();
+                toast.success(
+                  "what are we ? some kinda unintentionally functionality",
+                );
+              }
+            }}
+          >
+            <IconMoodTongueWink />
+            Approve Yourself
+          </Button>
+        ) : (
+          <div className="grid gap-2 grid-cols-2">
+            <Button
+              className="w-full"
+              onClick={async () => {
+                const act = await updateProofStatusAction({
+                  id,
+                  updatedStatus: true,
+                });
+
+                if (!act.success) {
+                  toast.error(act.error);
+                } else {
+                  router.refresh();
+                  toast.success("Approved Proof");
+                }
+              }}
+            >
+              Approve
+            </Button>
+            <Button
+              className="w-full"
+              onClick={async () => {
+                const act = await updateProofStatusAction({
+                  id,
+                  updatedStatus: false,
+                });
+
+                if (!act.success) {
+                  toast.error(act.error);
+                } else {
+                  router.refresh();
+                  toast.success("Rejected Proof");
+                }
+              }}
+            >
+              Reject
+            </Button>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
