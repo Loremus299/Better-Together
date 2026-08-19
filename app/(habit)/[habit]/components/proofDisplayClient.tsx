@@ -13,6 +13,7 @@ import { updateProofStatusAction } from "../action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function ProofDisplayClient({
   id,
@@ -43,7 +44,7 @@ export default function ProofDisplayClient({
     date.getDate() === today.getDate();
 
   return (
-    <Card>
+    <Card className={cn(proofStatus !== "pending" ? "opacity-25" : "")}>
       <CardHeader>
         <div className="flex items-center gap-2">
           {isSubmittedToday ? (
