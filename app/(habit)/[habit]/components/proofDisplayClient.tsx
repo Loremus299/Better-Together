@@ -55,7 +55,17 @@ export default function ProofDisplayClient({
           Proof submitted by {isSelf ? "You" : userName}
         </div>
         <CardDescription>
-          Approval Status: {proofStatus} <br />
+          Approval Status:{" "}
+          <span
+            className={cn(
+              proofStatus === "pending" && "text-yellow-500",
+              proofStatus === "accepted" && "text-green-500",
+              proofStatus === "rejected" && "text-red-500",
+            )}
+          >
+            {proofStatus}
+          </span>{" "}
+          <br />
           For task: {task} <br />
           Submitted on: {isSubmittedToday ? "today" : date.getDate()}
         </CardDescription>
