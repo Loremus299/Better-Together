@@ -5,9 +5,9 @@ export default function TaskDisplayClient({
   proofTime,
 }: {
   task: string;
-  proofTime: string;
+  proofTime?: string;
 }) {
-  const date = new Date(proofTime);
+  const date = new Date(proofTime ?? "");
   const today = new Date();
 
   const isDoneToday =

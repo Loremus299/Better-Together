@@ -14,6 +14,7 @@ import HabitAdminSettings from "./components/habitAdminSettings";
 import TaskDisplay from "./components/taskDisplay";
 import { InferSelectModel } from "drizzle-orm";
 import { habitProofsTable } from "@/db/schema";
+import ProofDisplay from "./components/proofDisplay";
 
 export default async function Page({
   params,
@@ -149,9 +150,19 @@ export default async function Page({
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel className="hover:border hover:border-chart-2">
+              <ResizablePanel className="hover:border hover:border-chart-2 p-4">
                 {proofArr.map((item) => (
-                  <div key={item.id}>{item.proofStatus}</div>
+                  <ProofDisplay
+                    id={item.id}
+                    currentUser={session.user.id}
+                    proofTime={item.timeStamp}
+                    task={item.task}
+                    userid={item.user}
+                    key={item.id}
+                    proofStatus={item.proofStatus}
+                    description={item.description}
+                    media={item.media}
+                  />
                 ))}
               </ResizablePanel>
             </ResizablePanelGroup>

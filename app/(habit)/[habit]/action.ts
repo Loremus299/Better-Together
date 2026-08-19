@@ -366,13 +366,19 @@ export async function createProofAction({
       log,
     });
 
-    if (!isMember.value.success) {
+    const isAdmin = await habitOps.isUserAdmin({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isMember.value.success || !isAdmin.value.success) {
       return Result.error<void, string>(
         "Could not determine authority over action",
       ).type();
     }
 
-    if (!isMember.value.data) {
+    if (!isMember.value.data && !isAdmin.value.data) {
       return Result.error<void, string>(
         "You don't have authority to perform this action",
       ).type();
@@ -402,7 +408,7 @@ export async function updateProofStatusAction({
 }: {
   id: string;
   updatedStatus: boolean;
-}) {
+}): Promise<ResultType<void, string>> {
   const log = new Logger();
   log.trace({ layer: "update proof entry" });
 
@@ -415,7 +421,7 @@ export async function updateProofStatusAction({
     const proofDetails = await habitService.readProofById({ id, log });
 
     if (!proofDetails.value.success)
-      return Result.error(proofDetails.value.error).type();
+      return Result.error<void, string>(proofDetails.value.error).type();
 
     const taskDetails = await habitService.readTaskById({
       id: proofDetails.value.data.task,
@@ -423,7 +429,7 @@ export async function updateProofStatusAction({
     });
 
     if (!taskDetails.value.success)
-      return Result.error(taskDetails.value.error);
+      return Result.error<void, string>(taskDetails.value.error).type();
 
     const isMember = await habitOps.isUserMember({
       user: session.user.id,
@@ -431,13 +437,19 @@ export async function updateProofStatusAction({
       log,
     });
 
-    if (!isMember.value.success) {
+    const isAdmin = await habitOps.isUserAdmin({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (!isMember.value.success || !isAdmin.value.success) {
       return Result.error<void, string>(
         "Could not determine authority over action",
       ).type();
     }
 
-    if (!isMember.value.data) {
+    if (!isMember.value.data && !isAdmin.value.data) {
       return Result.error<void, string>(
         "You don't have authority to perform this action",
       ).type();
