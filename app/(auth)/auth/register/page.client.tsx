@@ -45,11 +45,13 @@ export default function RegisterForm({
   });
 
   const onSubmit = async (values: FormValues) => {
+    const toastID = toast.loading("Processing");
     const act = await authClient.signUp.email({
       name: values.name,
       email: values.email,
       password: values.password,
     });
+    toast.dismiss(toastID);
 
     if (act.error) {
       toast.error(

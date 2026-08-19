@@ -76,10 +76,12 @@ export default function ProofDisplayClient({
         {proofStatus !== "pending" ? null : isSelf ? (
           <Button
             onClick={async () => {
+              const toastID = toast.loading("Processing");
               const act = await updateProofStatusAction({
                 id,
                 updatedStatus: true,
               });
+              toast.dismiss(toastID);
 
               if (!act.success) {
                 toast.error(act.error);
@@ -99,10 +101,12 @@ export default function ProofDisplayClient({
             <Button
               className="w-full"
               onClick={async () => {
+                const toastID = toast.loading("Processing");
                 const act = await updateProofStatusAction({
                   id,
                   updatedStatus: true,
                 });
+                toast.dismiss(toastID);
 
                 if (!act.success) {
                   toast.error(act.error);
@@ -117,10 +121,12 @@ export default function ProofDisplayClient({
             <Button
               className="w-full"
               onClick={async () => {
+                const toastID = toast.loading("Processing");
                 const act = await updateProofStatusAction({
                   id,
                   updatedStatus: false,
                 });
+                toast.dismiss(toastID);
 
                 if (!act.success) {
                   toast.error(act.error);

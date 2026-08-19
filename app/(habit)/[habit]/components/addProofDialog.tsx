@@ -47,6 +47,7 @@ export default function AddProofDialog({
   });
 
   const onSubmit = async (values: AddProofValues) => {
+    const toastID = toast.loading("Processing");
     const data = new FormData();
 
     if (values.media) {
@@ -83,6 +84,8 @@ export default function AddProofDialog({
         id: values.id,
         description: values.description,
       });
+
+      toast.dismiss(toastID);
 
       if (!act.success) {
         toast.error(act.error);

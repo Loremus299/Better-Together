@@ -44,8 +44,9 @@ export default function UpdateDetailsDialog({
   });
 
   const onSubmit = async (values: UpdateDetailsValue) => {
-    console.log("hi");
+    const toastID = toast.loading("Processing");
     const act = await updateDetailsAction(values);
+    toast.dismiss(toastID);
     if (act.success) {
       toast.success("Successfully updated details");
       router.refresh();

@@ -37,7 +37,9 @@ export default function AddMemberDialog({
   });
 
   const onSubmit = async (values: AddMemberValues) => {
+    const toastID = toast.loading("Processing");
     const act = await addMemberAction(values);
+    toast.dismiss(toastID);
     if (act.success) {
       toast.success("Added user to habit");
     } else {

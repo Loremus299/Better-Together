@@ -40,10 +40,12 @@ export default function LoginForm({
   });
 
   const onSubmit = async (values: FormValues) => {
+    const toastID = toast.loading("Processing");
     const { error } = await authClient.signIn.email({
       email: values.email,
       password: values.password,
     });
+    toast.dismiss(toastID);
 
     if (error) {
       toast.error(error.message ?? "Invalid email or password.");

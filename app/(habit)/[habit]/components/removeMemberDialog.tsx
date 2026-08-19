@@ -52,7 +52,9 @@ export default function RemoveMemberDialog({
   });
 
   const onSubmit = async (values: RemoveFormValues) => {
+    const toastID = toast.loading("Processing");
     const act = await removeMemberAction(values);
+    toast.dismiss(toastID);
     if (act.success) {
       router.refresh();
       toast.success("Removed member successfully");

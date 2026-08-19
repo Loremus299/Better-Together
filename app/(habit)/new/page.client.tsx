@@ -33,7 +33,9 @@ export default function CreateHabitForm({
   });
 
   const onSubmit = async (values: CreateHabitValues) => {
+    const toastID = toast.loading("Processing");
     const action = await createHabitAction(values);
+    toast.dismiss(toastID);
     if (action.success) {
       router.replace(`/${action.data}`);
     } else {

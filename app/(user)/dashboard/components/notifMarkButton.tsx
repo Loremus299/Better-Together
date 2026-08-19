@@ -14,7 +14,9 @@ export default function NotifMarkButton({ id }: { id: string }) {
       size={"xs"}
       variant={"ghost"}
       onClick={async () => {
+        const toastID = toast.loading("Processing");
         const act = await markNotificationAsReadAction(id);
+        toast.dismiss(toastID);
         if (act.success) {
           toast.success("Notification marked as read");
           router.refresh();

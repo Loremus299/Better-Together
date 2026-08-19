@@ -45,6 +45,7 @@ export default function UpdateTaskDialog({
   });
 
   const onSubmit = async (values: UpdateTaskValues) => {
+    const toastID = toast.loading("Processing");
     const act = await updateTaskAction(values);
     if (!act.success) {
       toast.error(act.error);
@@ -52,6 +53,7 @@ export default function UpdateTaskDialog({
       router.refresh();
       toast.success("Modified task successfully.");
     }
+    toast.dismiss(toastID);
   };
 
   return (

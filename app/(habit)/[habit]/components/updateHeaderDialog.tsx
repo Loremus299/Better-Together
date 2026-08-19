@@ -38,6 +38,7 @@ export default function UpdateHeaderDialog({
   });
 
   const onSubmit = async (values: UpdateHeaderValues) => {
+    const toastID = toast.loading("Processing");
     const q = await Result.tryCatch({}, async () => {
       const data = new FormData();
       data.append("file", values.file);
@@ -53,11 +54,14 @@ export default function UpdateHeaderDialog({
       if (q.value.data.ok) {
         const act = await updateHeaderAction({ habit, header: data.id });
         if (!act.success) {
+          toast.dismiss(toastID);
           toast.error(act.error);
         } else {
+          toast.dismiss(toastID);
           router.refresh();
         }
       } else {
+        toast.dismiss(toastID);
         toast.error(data.error);
       }
     }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { deleteHabitAction } from "../action";
 import { IconCheck } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function DeleteHabitAlert({
   habit,
@@ -23,9 +24,11 @@ export default function DeleteHabitAlert({
         be able to recover data after this click. ( ˶°ㅁ°) !!
         <Button
           onClick={async () => {
+            const toastID = toast.loading("Processing");
             await deleteHabitAction({ habit }).then(() =>
               router.push("/dashboard"),
             );
+            toast.dismiss(toastID);
           }}
         >
           <IconCheck />I am sure

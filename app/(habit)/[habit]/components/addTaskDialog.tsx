@@ -44,7 +44,9 @@ export default function AddTaskDialog({
   });
 
   const onSubmit = async (values: AddTaskValues) => {
+    const toastID = toast.loading("Processing");
     const act = await addTaskAction(values);
+    toast.dismiss(toastID);
     if (!act.success) {
       toast.error(act.error);
     } else {
