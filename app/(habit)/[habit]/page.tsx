@@ -150,20 +150,22 @@ export default async function Page({
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel className="hover:border hover:border-chart-2 p-4 flex flex-wrap gap-4">
-                {proofArr.map((item) => (
-                  <ProofDisplay
-                    id={item.id}
-                    currentUser={session.user.id}
-                    proofTime={item.timeStamp}
-                    task={item.task}
-                    userid={item.user}
-                    key={item.id}
-                    proofStatus={item.proofStatus}
-                    description={item.description}
-                    media={item.media}
-                  />
-                ))}
+              <ResizablePanel className="hover:border hover:border-chart-2 p-4">
+                <div className="flex flex-wrap gap-4">
+                  {proofArr.map((item) => (
+                    <ProofDisplay
+                      id={item.id}
+                      currentUser={session.user.id}
+                      proofTime={item.timeStamp}
+                      task={item.task}
+                      userid={item.user}
+                      key={item.id}
+                      proofStatus={item.proofStatus}
+                      description={item.description}
+                      media={item.media}
+                    />
+                  ))}
+                </div>
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>

@@ -64,7 +64,7 @@ export default function UpdateTaskDialog({
         <form className="grid gap-2" onSubmit={form.handleSubmit(onSubmit)}>
           <FormController
             form={form}
-            label="New Task Name"
+            label="Task Name"
             name="task"
             placeholder=""
             render={({ field, fieldState }) => (
@@ -77,7 +77,7 @@ export default function UpdateTaskDialog({
           />
           <FormController
             form={form}
-            label="New Task Name"
+            label="Task Description"
             name="description"
             placeholder=""
             render={({ field, fieldState }) => (
