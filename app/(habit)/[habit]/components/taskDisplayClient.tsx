@@ -2,24 +2,24 @@
 
 export default function TaskDisplayClient({
   task,
-  proofTime,
-  isPending,
+  proofList,
 }: {
   task: string;
-  proofTime?: string;
-  isPending: boolean;
+  proofList: { timeStamp: string; proofStatus: string }[];
 }) {
-  const date = new Date(Number(proofTime ?? "") * 1000);
   const today = new Date();
 
-  console.log(date, today);
+  const isDoneToday = proofList.every((proof) => {
+    const proofDate = new Date(Number(proof.timeStamp) * 1000);
+    const isFromToday =
+      proofDate.getFullYear() === today.getFullYear() &&
+      proofDate.getMonth() === today.getMonth() &&
+      proofDate.getDate() === today.getDate();
 
-  const isDoneToday =
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
+    return isFromToday && proof.proofStatus == "accepted";
+  });
 
-  if (isDoneToday && !isPending) {
+  if (isDoneToday) {
     return (
       <h3 className="tracking-tight font-semibold line-through text-muted-foreground">
         {task}

@@ -45,11 +45,7 @@ export default async function TaskDisplay({
   return (
     <div>
       <div className="flex justify-between">
-        <TaskDisplayClient
-          proofTime={userArr[0]?.timeStamp}
-          task={name}
-          isPending={userArr[0]?.proofStatus === "pending"}
-        />
+        <TaskDisplayClient proofList={userArr} task={name} />
         <div className="flex gap-2">
           {!isAdmin.value.data && (
             <UpdateTaskDialog description={description} task={name} id={task} />
