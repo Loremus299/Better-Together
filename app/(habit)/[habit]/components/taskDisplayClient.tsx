@@ -11,14 +11,14 @@ export default function TaskDisplayClient({
 
   const isDoneToday =
     proofList.length > 0 &&
-    proofList.every((proof) => {
+    proofList.some((proof) => {
       const proofDate = new Date(Number(proof.timeStamp) * 1000);
       const isFromToday =
         proofDate.getFullYear() === today.getFullYear() &&
         proofDate.getMonth() === today.getMonth() &&
         proofDate.getDate() === today.getDate();
 
-      return isFromToday && proof.proofStatus !== "pending";
+      return isFromToday && proof.proofStatus == "accepted";
     });
 
   if (isDoneToday) {
