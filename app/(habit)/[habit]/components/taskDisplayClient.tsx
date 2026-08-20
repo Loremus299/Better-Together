@@ -9,15 +9,17 @@ export default function TaskDisplayClient({
 }) {
   const today = new Date();
 
-  const isDoneToday = proofList.every((proof) => {
-    const proofDate = new Date(Number(proof.timeStamp) * 1000);
-    const isFromToday =
-      proofDate.getFullYear() === today.getFullYear() &&
-      proofDate.getMonth() === today.getMonth() &&
-      proofDate.getDate() === today.getDate();
+  const isDoneToday =
+    proofList.length > 0 &&
+    proofList.every((proof) => {
+      const proofDate = new Date(Number(proof.timeStamp) * 1000);
+      const isFromToday =
+        proofDate.getFullYear() === today.getFullYear() &&
+        proofDate.getMonth() === today.getMonth() &&
+        proofDate.getDate() === today.getDate();
 
-    return isFromToday && proof.proofStatus !== "pending";
-  });
+      return isFromToday && proof.proofStatus !== "pending";
+    });
 
   if (isDoneToday) {
     return (
