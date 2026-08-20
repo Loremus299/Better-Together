@@ -16,7 +16,7 @@ export default function TaskDisplayClient({
       proofDate.getMonth() === today.getMonth() &&
       proofDate.getDate() === today.getDate();
 
-    return isFromToday && proof.proofStatus == "accepted";
+    return isFromToday && proof.proofStatus !== "pending";
   });
 
   if (isDoneToday) {
