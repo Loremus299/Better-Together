@@ -73,6 +73,8 @@ export default function AddProofDialog({
         media: res.id,
       });
 
+      toast.dismiss(toastID);
+
       if (!act.success) {
         toast.error(act.error);
       } else {
@@ -85,11 +87,11 @@ export default function AddProofDialog({
         description: values.description,
       });
 
+      toast.dismiss(toastID);
+
       if (!act.success) {
-        toast.dismiss(toastID);
         toast.error(act.error);
       } else {
-        toast.dismiss(toastID);
         router.refresh();
         toast.success("Added proof for today");
       }
