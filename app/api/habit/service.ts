@@ -376,6 +376,30 @@ async function readTaskById({ id, log }: { id: string; log: Logger }) {
   );
 }
 
+async function readTaskByUser({
+  user,
+  log,
+}: {
+  user: string;
+  log: Logger;
+}): Promise<Result<InferSelectModel<typeof habitTasksTable>[][], string>> {
+  log.trace({ layer: "habit service read tasks by user" });
+  log.info({ user });
+
+  const habits = await readHabitsByUser({ user, log });
+
+  if (!habits.value.success) return Result.error(habits.value.error);
+
+  const tasks: InferSelectModel<typeof habitTasksTable>[][] = [];
+  for (const habit of habits.value.data) {
+    const habitTasks = await readTasksByHabit({ habit: habit.id, log });
+    if (!habitTasks.value.success) return Result.error(habitTasks.value.error);
+    tasks.push(habitTasks.value.data);
+  }
+
+  return Result.ok(tasks);
+}
+
 async function updateTask({
   task,
   description,
@@ -565,6 +589,7 @@ export const habitService = {
 
   addTaskInHabit,
   readTasksByHabit,
+  readTaskByUser,
   readTaskById,
   updateTask,
   deleteTask,
