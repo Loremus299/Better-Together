@@ -18,14 +18,16 @@ export default async function IncompleteTaskDisplay({
 
   return (
     <div className="w-full h-full @container p-4">
-      {tasks.value.data.flat().map((item) => (
-        <TaskDisplay
-          key={item.id}
-          id={item.id}
-          name={item.task}
-          description={item.description}
-        />
-      ))}
+      <div className="grid gap-2">
+        {tasks.value.data.flat().map((item) => (
+          <TaskDisplay
+            key={item.id}
+            id={item.id}
+            name={item.task}
+            description={item.description}
+          />
+        ))}
+      </div>
     </div>
   );
 }
