@@ -8,6 +8,7 @@ import NotifDisplay from "./components/notifDisplay";
 import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import HabitDisplay from "./components/habitDisplay";
+import IncompleteTaskDisplay from "./components/incompleteTaskDisplay";
 
 export default async function Page() {
   const session = await getSession();
@@ -70,9 +71,7 @@ export default async function Page() {
                     defaultSize={"75%"}
                     className="hover:border hover:border-chart-2"
                   >
-                    <div className="h-full w-full grid place-items-center">
-                      Todos
-                    </div>
+                    <IncompleteTaskDisplay user={session.user.id} />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>

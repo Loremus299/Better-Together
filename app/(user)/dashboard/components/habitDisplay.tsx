@@ -24,6 +24,7 @@ export default async function HabitDisplay() {
   });
 
   if (!habits.value.success) {
+    log.print();
     redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
   }
 
