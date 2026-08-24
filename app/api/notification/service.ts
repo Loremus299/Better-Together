@@ -1,7 +1,7 @@
 import { Logger } from "@/lib/logger";
 import { drizzleOps } from "../ops/drizzle";
 import { notificationTable } from "@/db/schema";
-import { eq, InferSelectModel } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { Result } from "@/lib/result";
 
 async function markNotifRead({
@@ -46,8 +46,26 @@ async function readById({ id, log }: { id: string; log: Logger }) {
   );
 }
 
+async function getUnreadNotifsForUser({
+  user,
+  log,
+}: {
+  user: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "notif ops read by user" });
+  log.debug({ user });
+  return await drizzleOps.readWithCondition(
+    notificationTable,
+    (notificationTable) =>
+      and(eq(notificationTable.user, user), eq(notificationTable.read, false)),
+    log,
+  );
+}
+
 export const notificationService = {
   markNotifRead,
   readByUser,
   readById,
+  getUnreadNotifsForUser,
 };
