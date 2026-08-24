@@ -55,7 +55,7 @@ async function getUnreadNotifsForUser({
 }) {
   log.trace({ layer: "notif ops read by user" });
   log.debug({ user });
-  return await drizzleOps.readWithCondition(
+  return await drizzleOps.readAllWithCondition(
     notificationTable,
     (notificationTable) =>
       and(eq(notificationTable.user, user), eq(notificationTable.read, false)),
