@@ -77,7 +77,7 @@ async function isUserChecker({
   habit: string;
   log: Logger;
 }) {
-  log.trace({ layer: "habit is admin op" });
+  log.trace({ layer: "habit is checker op" });
   log.debug({ user, habit });
   return (
     await drizzleOps.readAllWithCondition(
