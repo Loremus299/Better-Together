@@ -25,7 +25,7 @@ export default async function TaskDisplay({
     redirect("/auth/login");
   }
   const proof = await habitService.readProofsByTask({ task, log });
-  const isAdmin = await habitOps.isUserMember({
+  const isMember = await habitOps.isUserMember({
     user: session.user.id,
     habit,
     log,
@@ -38,7 +38,7 @@ export default async function TaskDisplay({
 
   if (
     !proof.value.success ||
-    !isAdmin.value.success ||
+    !isMember.value.success ||
     !isChecker.value.success
   ) {
     log.print();
@@ -56,9 +56,14 @@ export default async function TaskDisplay({
       <div className="flex justify-between">
         <TaskDisplayClient proofList={userArr} task={name} />
         <div className="flex gap-2">
-          {!isAdmin.value.data && (
-            <UpdateTaskDialog description={description} task={name} id={task} />
-          )}
+          {!isMember.value.data ||
+            (!isChecker.value.data && (
+              <UpdateTaskDialog
+                description={description}
+                task={name}
+                id={task}
+              />
+            ))}
           {!isChecker.value.data && <AddProofDialog description="" id={task} />}
         </div>
       </div>
