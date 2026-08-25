@@ -104,6 +104,7 @@ export default async function Page({
                   className="hover:border hover:border-chart-2"
                 >
                   <HabitAdminSettings
+                    checker={false}
                     name={habitdata.value.data.name}
                     description={habitdata.value.data.description}
                     habit={habit}

@@ -22,6 +22,7 @@ export default function HabitAdminSettings({
   description,
   habit,
   members,
+  checker,
 }: {
   name: string;
   description: string;
@@ -35,6 +36,7 @@ export default function HabitAdminSettings({
     createdAt: Date;
     updatedAt: Date;
   }[];
+  checker: boolean;
 }) {
   const [updateDetailsOpen, setUpdateDetailsOpen] = useState(false);
   const [updateHeaderOpen, setUpdateHeaderOpen] = useState(false);
@@ -114,6 +116,7 @@ export default function HabitAdminSettings({
       />
 
       <AddMemberDialog
+        checker={checker}
         email=""
         habit={habit}
         open={addMemberOpen}
