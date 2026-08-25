@@ -563,11 +563,11 @@ async function createProof({
   media?: string;
   description?: string;
   log: Logger;
-}) {
+}): Promise<Result<InferSelectModel<typeof habitProofsTable>, string>> {
   log.trace({ layer: "habit service create proof" });
   log.info({ user, task, description, media });
 
-  return await drizzleOps.insert(
+  const x = await drizzleOps.insert(
     habitProofsTable,
     {
       user,
@@ -578,6 +578,34 @@ async function createProof({
     },
     log,
   );
+
+  const taskDetails = await readTaskById({ id: task, log });
+  if (!taskDetails.value.success) return Result.error(taskDetails.value.error);
+
+  const members = await readMembersByHabit({
+    habit: taskDetails.value.data.habit,
+    log,
+  });
+  if (!members.value.success) return Result.error(members.value.error);
+
+  const habitData = await readHabit({
+    habit: taskDetails.value.data.habit,
+    log,
+  });
+  if (!habitData.value.success) return Result.error(habitData.value.error);
+
+  for (const member of members.value.data) {
+    if (member.id !== user) {
+      await notifOps.addNotif({
+        user: member.id,
+        title: `Proof added in habit ${habitData.value.data.name}`,
+        body: `A new proof was added to habit ${habitData.value.data.name} for task ${taskDetails.value.data.task}. You should go and verify it (˶˃ ᵕ ˂˶) .ᐟ.ᐟ`,
+        log,
+      });
+    }
+  }
+
+  return x;
 }
 
 async function readProofsByTask({ task, log }: { task: string; log: Logger }) {
