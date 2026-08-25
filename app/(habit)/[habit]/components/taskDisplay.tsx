@@ -25,11 +25,6 @@ export default async function TaskDisplay({
     redirect("/auth/login");
   }
   const proof = await habitService.readProofsByTask({ task, log });
-  const isMember = await habitOps.isUserAdmin({
-    user: session.user.id,
-    habit,
-    log,
-  });
   const isChecker = await habitOps.isUserChecker({
     user: session.user.id,
     habit,
@@ -43,7 +38,6 @@ export default async function TaskDisplay({
 
   if (
     !proof.value.success ||
-    !isMember.value.success ||
     !isChecker.value.success ||
     !isAdmin.value.success
   ) {
