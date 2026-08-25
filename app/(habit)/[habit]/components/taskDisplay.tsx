@@ -30,8 +30,17 @@ export default async function TaskDisplay({
     habit,
     log,
   });
+  const isChecker = await habitOps.isUserChecker({
+    user: session.user.id,
+    habit,
+    log,
+  });
 
-  if (!proof.value.success || !isAdmin.value.success) {
+  if (
+    !proof.value.success ||
+    !isAdmin.value.success ||
+    !isChecker.value.success
+  ) {
     log.print();
     redirect(
       `/error?e=${encodeURI("Failed to load initial data")}&id=${log.getId()}`,
@@ -50,7 +59,7 @@ export default async function TaskDisplay({
           {!isAdmin.value.data && (
             <UpdateTaskDialog description={description} task={name} id={task} />
           )}
-          <AddProofDialog description="" id={task} />
+          {!isChecker.value.data && <AddProofDialog description="" id={task} />}
         </div>
       </div>
       <p className="text-muted-foreground">{description}</p>

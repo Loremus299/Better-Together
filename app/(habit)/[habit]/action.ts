@@ -443,13 +443,27 @@ export async function updateProofStatusAction({
       log,
     });
 
-    if (!isMember.value.success || !isAdmin.value.success) {
+    const isChecker = await habitOps.isUserChecker({
+      user: session.user.id,
+      habit: taskDetails.value.data.habit,
+      log,
+    });
+
+    if (
+      !isMember.value.success ||
+      !isAdmin.value.success ||
+      !isChecker.value.success
+    ) {
       return Result.error<void, string>(
         "Could not determine authority over action",
       ).type();
     }
 
-    if (!isMember.value.data && !isAdmin.value.data) {
+    if (
+      !isMember.value.data &&
+      !isAdmin.value.data &&
+      !isChecker.value.success
+    ) {
       return Result.error<void, string>(
         "You don't have authority to perform this action",
       ).type();

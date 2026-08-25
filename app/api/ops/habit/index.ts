@@ -68,7 +68,40 @@ async function isUserAdmin({
   });
 }
 
+async function isUserChecker({
+  user,
+  habit,
+  log,
+}: {
+  user: string;
+  habit: string;
+  log: Logger;
+}) {
+  log.trace({ layer: "habit is admin op" });
+  log.debug({ user, habit });
+  return (
+    await drizzleOps.readAllWithCondition(
+      habitMembersTable,
+      (habitMembersTable) =>
+        and(
+          eq(habitMembersTable.habit, habit),
+          eq(habitMembersTable.member, user),
+          eq(habitMembersTable.role, "checker"),
+        ),
+      log,
+    )
+  ).mapOk((t) => {
+    log.debug({ record: t });
+    if (t.length == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  });
+}
+
 export const habitOps = {
   isUserAdmin,
   isUserMember,
+  isUserChecker,
 };
