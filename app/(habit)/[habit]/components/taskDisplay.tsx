@@ -56,14 +56,9 @@ export default async function TaskDisplay({
       <div className="flex justify-between">
         <TaskDisplayClient proofList={userArr} task={name} />
         <div className="flex gap-2">
-          {!isMember.value.data ||
-            (!isChecker.value.data && (
-              <UpdateTaskDialog
-                description={description}
-                task={name}
-                id={task}
-              />
-            ))}
+          {(!isMember.value.data || !isChecker.value.data) && (
+            <UpdateTaskDialog description={description} task={name} id={task} />
+          )}
           {!isChecker.value.data && <AddProofDialog description="" id={task} />}
         </div>
       </div>

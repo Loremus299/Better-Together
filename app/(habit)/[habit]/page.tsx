@@ -71,7 +71,7 @@ export default async function Page({
     }
   }
 
-  if (!isAdmin.value.data && !isMember.value.data) {
+  if (!isAdmin.value.data && !isMember.value.data && !isChecker.value.data) {
     redirect(
       `/error?e=${encodeURI("You do not have access to this habit")}&id=${log.getId()}`,
     );

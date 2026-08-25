@@ -262,7 +262,7 @@ async function addMemberAsChecker({
 
   const data = await drizzleOps.insert(
     habitMembersTable,
-    { habit, member: userDetails.value.data.id, role: "member" },
+    { habit, member: userDetails.value.data.id, role: "checker" },
     log,
   );
 
