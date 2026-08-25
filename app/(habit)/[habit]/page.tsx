@@ -39,6 +39,11 @@ export default async function Page({
     habit,
     log,
   });
+  const isChecker = await habitOps.isUserChecker({
+    user: session.user.id,
+    habit,
+    log,
+  });
   const habitdata = await habitService.readHabit({ habit, log });
   const members = await habitService.readMembersByHabit({ habit, log });
   const tasks = await habitService.readTasksByHabit({ habit, log });
@@ -46,6 +51,7 @@ export default async function Page({
   if (
     !isAdmin.value.success ||
     !isMember.value.success ||
+    !isChecker.value.success ||
     !habitdata.value.success ||
     !members.value.success ||
     !tasks.value.success
