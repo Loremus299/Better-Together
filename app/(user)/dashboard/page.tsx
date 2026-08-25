@@ -9,6 +9,7 @@ import { getSession } from "@/lib/server-util";
 import { redirect } from "next/navigation";
 import HabitDisplay from "./components/habitDisplay";
 import IncompleteTaskDisplay from "./components/incompleteTaskDisplay";
+import StreakCalDisplay from "./components/streakCalDisplay";
 
 export default async function Page() {
   const session = await getSession();
@@ -54,26 +55,21 @@ export default async function Page() {
                 defaultSize={"70%"}
                 className="hover:border hover:border-chart-2"
               >
-                <div className="h-full w-full grid place-items-center">
-                  <HabitDisplay />
-                </div>
+                <ResizablePanelGroup orientation="vertical">
+                  <ResizablePanel defaultSize={"23%"}>
+                    <StreakCalDisplay user={session.user.id} />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel>
+                    <div className="h-full w-full grid place-items-center">
+                      <HabitDisplay />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel>
-                <ResizablePanelGroup orientation="vertical">
-                  <ResizablePanel className="hover:border hover:border-chart-2">
-                    <div className="h-full w-full grid place-items-center">
-                      Streak Cal
-                    </div>
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel
-                    defaultSize={"75%"}
-                    className="hover:border hover:border-chart-2"
-                  >
-                    <IncompleteTaskDisplay user={session.user.id} />
-                  </ResizablePanel>
-                </ResizablePanelGroup>
+                <IncompleteTaskDisplay user={session.user.id} />
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
