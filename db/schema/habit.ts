@@ -19,7 +19,7 @@ export const habitTable = pgTable("habit", {
     .$onUpdate(() => new Date()),
 });
 
-export const rolesEnum = pgEnum("roles", ["admin", "member"]);
+export const rolesEnum = pgEnum("roles", ["admin", "member", "checker"]);
 
 export const habitMembersTable = pgTable("habitMembers", {
   id: text("id")
