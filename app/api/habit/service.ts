@@ -7,7 +7,7 @@ import {
 } from "@/db/schema";
 import { drizzleOps } from "../ops/drizzle";
 import { Logger } from "@/lib/logger";
-import { and, eq, InferSelectModel } from "drizzle-orm";
+import { and, eq, InferSelectModel, notInArray } from "drizzle-orm";
 import { Result } from "@/lib/result";
 import { notifOps } from "../ops/notification";
 
@@ -79,15 +79,24 @@ async function readHabit({
 async function readHabitsByUser({
   user,
   log,
+  excludeRoles,
 }: {
   user: string;
   log: Logger;
+  excludeRoles?: ("admin" | "member" | "checker")[];
 }): Promise<Result<InferSelectModel<typeof habitTable>[], string>> {
   log.trace({ layer: "habit service read all by user" });
   log.info({ user });
+
+  const condition =
+    excludeRoles && excludeRoles.length > 0
+      ? (t: typeof habitMembersTable) =>
+          and(eq(t.member, user), notInArray(t.role, excludeRoles))
+      : (t: typeof habitMembersTable) => eq(t.member, user);
+
   const query = await drizzleOps.readAllWithCondition(
     habitMembersTable,
-    (habitMembersTable) => eq(habitMembersTable.member, user),
+    condition,
     log,
   );
 
@@ -437,7 +446,11 @@ async function readTaskByUser({
   log.trace({ layer: "habit service read tasks by user" });
   log.info({ user });
 
-  const habits = await readHabitsByUser({ user, log });
+  const habits = await readHabitsByUser({
+    user,
+    log,
+    excludeRoles: ["checker"],
+  });
 
   if (!habits.value.success) return Result.error(habits.value.error);
 
