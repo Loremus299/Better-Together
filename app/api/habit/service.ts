@@ -284,21 +284,35 @@ async function addMemberAsChecker({
 async function readMembersByHabit({
   habit,
   log,
+  checksAndAdmins,
 }: {
   habit: string;
   log: Logger;
+  checksAndAdmins?: boolean;
 }): Promise<Result<InferSelectModel<typeof user>[], string>> {
   log.trace({ layer: "habit service read member by id" });
   log.info({ habit });
-  const members = await drizzleOps.readAllWithCondition(
-    habitMembersTable,
-    (habitMembersTable) =>
-      and(
-        eq(habitMembersTable.habit, habit),
-        eq(habitMembersTable.role, "member"),
-      ),
-    log,
-  );
+  const membersFunction = async () => {
+    if (checksAndAdmins) {
+      return await drizzleOps.readAllWithCondition(
+        habitMembersTable,
+        (habitMembersTable) => eq(habitMembersTable.habit, habit),
+
+        log,
+      );
+    } else {
+      return await drizzleOps.readAllWithCondition(
+        habitMembersTable,
+        (habitMembersTable) =>
+          and(
+            eq(habitMembersTable.habit, habit),
+            eq(habitMembersTable.role, "member"),
+          ),
+        log,
+      );
+    }
+  };
+  const members = await membersFunction();
 
   if (!members.value.success) {
     return Result.error("Could not find habit members");
@@ -390,7 +404,11 @@ async function addTaskInHabit({
 
   if (!taskDetails.value.success) return Result.error(taskDetails.value.error);
 
-  const members = await readMembersByHabit({ habit, log });
+  const members = await readMembersByHabit({
+    habit,
+    log,
+    checksAndAdmins: true,
+  });
   const habitData = await readHabit({ habit, log });
 
   if (!members.value.success) return Result.error(members.value.error);
@@ -493,6 +511,7 @@ async function updateTask({
   const members = await readMembersByHabit({
     habit: oldtask.value.data.habit,
     log,
+    checksAndAdmins: true,
   });
   const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
 
@@ -534,6 +553,7 @@ async function deleteTask({
   const members = await readMembersByHabit({
     habit: oldtask.value.data.habit,
     log,
+    checksAndAdmins: true,
   });
   const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
 
@@ -579,12 +599,15 @@ async function createProof({
     log,
   );
 
+  if (!x.value.success) return x;
+
   const taskDetails = await readTaskById({ id: task, log });
   if (!taskDetails.value.success) return Result.error(taskDetails.value.error);
 
   const members = await readMembersByHabit({
     habit: taskDetails.value.data.habit,
     log,
+    checksAndAdmins: true,
   });
   if (!members.value.success) return Result.error(members.value.error);
 
