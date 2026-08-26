@@ -56,14 +56,12 @@ export default async function Page() {
                 className="hover:border hover:border-chart-2"
               >
                 <ResizablePanelGroup orientation="vertical">
-                  <ResizablePanel defaultSize={"23%"}>
+                  <ResizablePanel defaultSize={"8.5em"}>
                     <StreakCalDisplay user={session.user.id} />
                   </ResizablePanel>
                   <ResizableHandle withHandle />
                   <ResizablePanel>
-                    <div className="h-full w-full grid place-items-center">
-                      <HabitDisplay />
-                    </div>
+                    <HabitDisplay />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>
