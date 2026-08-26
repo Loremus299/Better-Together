@@ -407,7 +407,7 @@ async function addTaskInHabit({
   const members = await readMembersByHabit({
     habit,
     log,
-    checksAndAdmins: true,
+    checksAndAdmins: false,
   });
   const habitData = await readHabit({ habit, log });
 
@@ -511,7 +511,7 @@ async function updateTask({
   const members = await readMembersByHabit({
     habit: oldtask.value.data.habit,
     log,
-    checksAndAdmins: true,
+    checksAndAdmins: false,
   });
   const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
 
@@ -553,7 +553,7 @@ async function deleteTask({
   const members = await readMembersByHabit({
     habit: oldtask.value.data.habit,
     log,
-    checksAndAdmins: true,
+    checksAndAdmins: false,
   });
   const habitData = await readHabit({ habit: oldtask.value.data.habit, log });
 
