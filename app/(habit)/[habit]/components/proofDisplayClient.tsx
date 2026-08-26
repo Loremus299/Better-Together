@@ -44,7 +44,9 @@ export default function ProofDisplayClient({
     date.getDate() === today.getDate();
 
   return (
-    <Card className={cn(proofStatus !== "pending" ? "opacity-25" : "")}>
+    <Card
+      className={cn("w-full", proofStatus !== "pending" ? "opacity-25" : "")}
+    >
       <CardHeader>
         <div className="flex items-center gap-2">
           {isSubmittedToday ? (
@@ -70,9 +72,13 @@ export default function ProofDisplayClient({
           Submitted on: {isSubmittedToday ? "today" : date.getDate()}
         </CardDescription>
       </CardHeader>
-      <CardContent>{description}</CardContent>
+      <CardContent className="wrap-anywhere">{description}</CardContent>
       <CardFooter className="grid gap-2">
-        <img src={url} alt={description ?? ""} className="rounded-xl" />
+        <img
+          src={url}
+          alt={description ?? ""}
+          className="rounded-xl wrap-anywhere"
+        />
         {proofStatus !== "pending" ? null : isSelf ? (
           <Button
             onClick={async () => {
