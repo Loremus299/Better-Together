@@ -618,14 +618,12 @@ async function createProof({
   if (!habitData.value.success) return Result.error(habitData.value.error);
 
   for (const member of members.value.data) {
-    if (member.id !== user) {
-      await notifOps.addNotif({
-        user: member.id,
-        title: `Proof added in habit ${habitData.value.data.name}`,
-        body: `A new proof was added to habit ${habitData.value.data.name} for task ${taskDetails.value.data.task}. You should go and verify it (˶˃ ᵕ ˂˶) .ᐟ.ᐟ`,
-        log,
-      });
-    }
+    await notifOps.addNotif({
+      user: member.id,
+      title: `Proof added in habit ${habitData.value.data.name}`,
+      body: `A new proof was added to habit ${habitData.value.data.name} for task ${taskDetails.value.data.task}. You should go and verify it (˶˃ ᵕ ˂˶) .ᐟ.ᐟ`,
+      log,
+    });
   }
 
   return x;

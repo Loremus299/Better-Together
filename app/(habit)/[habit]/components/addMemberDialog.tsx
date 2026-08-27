@@ -44,7 +44,7 @@ export default function AddMemberDialog({
 
   const onSubmit = async (values: AddMemberValues) => {
     const toastID = toast.loading("Processing");
-    if (values.checker) {
+    if (values.checker == true) {
       const act = await addCheckerAction(values);
       toast.dismiss(toastID);
       if (act.success) {
