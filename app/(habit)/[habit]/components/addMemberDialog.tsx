@@ -52,13 +52,14 @@ export default function AddMemberDialog({
       } else {
         toast.error(act.error);
       }
-    }
-    const act = await addMemberAction(values);
-    toast.dismiss(toastID);
-    if (act.success) {
-      toast.success("Added user to habit");
     } else {
-      toast.error(act.error);
+      const act = await addMemberAction(values);
+      toast.dismiss(toastID);
+      if (act.success) {
+        toast.success("Added user to habit");
+      } else {
+        toast.error(act.error);
+      }
     }
   };
 
