@@ -16,10 +16,10 @@ import {
   inArray,
   InferSelectModel,
   ne,
-  or,
 } from "drizzle-orm";
 import { db } from "@/db";
 import { PgAsyncTransaction, PgQueryResultHKT } from "drizzle-orm/pg-core";
+import notifService from "../notification/service";
 
 async function isUserInHabit({
   user,
@@ -177,13 +177,17 @@ async function readHabitsByUser({
   log.debug({ user, roles });
 
   if (roles) {
-    const condition = roles.map((role) => eq(habitMembersTable.role, role));
     return await drizzleOps.executeQuery(
       db
         .select(getColumns(habitTable))
         .from(habitTable)
         .innerJoin(habitMembersTable, eq(habitMembersTable.member, user))
-        .where(or(...condition)),
+        .where(
+          and(
+            eq(habitMembersTable.member, user),
+            inArray(habitMembersTable.role, roles),
+          ),
+        ),
       log.nest(),
     );
   } else {
@@ -191,18 +195,21 @@ async function readHabitsByUser({
       db
         .select(getColumns(habitTable))
         .from(habitTable)
-        .innerJoin(habitMembersTable, eq(habitMembersTable.member, user)),
+        .innerJoin(habitMembersTable, eq(habitMembersTable.member, user))
+        .where(eq(habitMembersTable.member, user)),
       log.nest(),
     );
   }
 }
 
 async function updateHabitById({
+  user,
   habit,
   name,
   description,
   log,
 }: {
+  user: string;
   habit: string;
   name?: string;
   description?: string;
@@ -222,34 +229,93 @@ async function updateHabitById({
   if (!allData.value.data[0])
     return Result.error("You don't have the authority to perform this action");
 
+  const [habitDetails] = allData.value.data;
+
   log.trace({ trace: "updating habit" });
-  return await drizzleOps.update(
+  const data = await drizzleOps.update(
     habitTable,
     {
-      name: name ?? allData.value.data[0].name,
-      description: description ?? allData.value.data[0].description,
+      name: name ?? habitDetails.name,
+      description: description ?? habitDetails.description,
     },
     (t) => eq(t.id, habit),
     log.nest(),
   );
+
+  log.trace({ trace: "sending notifications to other admins" });
+  (
+    await readMembersInHabit({
+      habit,
+      roles: [Roles.admin],
+      log,
+      excludeSelf: user,
+    })
+  ).mapOk(async (members) => {
+    for (const member of members) {
+      await notifService.createNotif({
+        title: "Admin updated habit",
+        body: `"${name ?? habitDetails.name}" was updated by admin.`,
+        user: member.member,
+        log: log.nest(),
+      });
+    }
+  });
+
+  return data;
 }
 
 async function deleteHabitById({
+  user,
   habit,
   log,
 }: {
+  user: string;
   habit: string;
   log: Logger;
 }): Promise<Result<InferSelectModel<typeof habitTable>, string>> {
   log.trace({ layer: "habit service - delete habit by id" });
   log.debug({ habit });
 
+  log.trace({ trace: "fetching essential data" });
+  const allData = await Result.settle([
+    readHabitById({ id: habit, log: log.nest() }),
+  ]);
+
+  if (!allData.value.success)
+    return Result.error("Failed to fetch necessary data for updating habit");
+
+  if (!allData.value.data[0])
+    return Result.error("You don't have the authority to perform this action");
+
+  const [habitDetails] = allData.value.data;
+
   log.trace({ trace: "deleting habit" });
-  return await drizzleOps.delete(
+  const data = await drizzleOps.delete(
     habitTable,
     (t) => eq(t.id, habit),
     log.nest(),
   );
+
+  log.trace({ trace: "sending notifications to other admins" });
+  (
+    await readMembersInHabit({
+      habit,
+      roles: [Roles.admin],
+      log,
+      excludeSelf: user,
+    })
+  ).mapOk(async (members) => {
+    for (const member of members) {
+      await notifService.createNotif({
+        title: "Admin updated habit",
+        body: `"${habitDetails.name}" was updated by admin.`,
+        user: member.member,
+        log: log.nest(),
+      });
+    }
+  });
+
+  return data;
 }
 
 async function addEmailToHabit({
@@ -258,7 +324,6 @@ async function addEmailToHabit({
   log,
   role,
 }: {
-  admin: string;
   habit: string;
   email: string;
   log: Logger;
@@ -270,11 +335,12 @@ async function addEmailToHabit({
   log.trace({ trace: "necessary data" });
   const allData = await Result.settle([
     drizzleOps.readTableUnique(user, { email }, log.nest()),
+    readHabitById({ id: habit, log: log.nest() }),
   ]);
   if (!allData.value.success)
     return Result.error("Could not fetch essential data to update task");
 
-  const [userDetails] = allData.value.data;
+  const [userDetails, habitDetails] = allData.value.data;
 
   log.trace({ trace: "Duplication check" });
   const memberExists = await drizzleOps.readTableUnique(
@@ -289,7 +355,7 @@ async function addEmailToHabit({
     return Result.error("Member already exists in habit");
 
   log.trace({ trace: "Adding member" });
-  return await drizzleOps.insert(
+  const data = drizzleOps.insert(
     habitMembersTable,
     {
       habit: habit,
@@ -298,20 +364,26 @@ async function addEmailToHabit({
     },
     log,
   );
+
+  notifService.createNotif({
+    title: "You were added in task",
+    body: `You were added in habit "${habitDetails.name}"`,
+    user: userDetails.id,
+    log: log.nest(),
+  });
+  return data;
 }
 
 async function readMembersInHabit({
-  user,
   habit,
   roles = [],
   log,
   excludeSelf,
 }: {
-  user: string;
   habit: string;
   roles: Roles[];
   log: Logger;
-  excludeSelf?: boolean;
+  excludeSelf?: string;
 }): Promise<Result<InferSelectModel<typeof habitMembersTable>[], string>> {
   log.trace({ layer: "habit service - read members in habit" });
   log.debug({ user, habit, roles });
@@ -319,7 +391,7 @@ async function readMembersInHabit({
   const conditions = [
     eq(habitMembersTable.habit, habit),
     ...(roles.length > 0 ? [inArray(habitMembersTable.role, roles)] : []),
-    ...(excludeSelf ? [ne(habitMembersTable.member, user)] : []),
+    ...(excludeSelf ? [ne(habitMembersTable.member, excludeSelf)] : []),
   ];
 
   return await drizzleOps.executeQuery(
@@ -348,18 +420,27 @@ async function removeMemberInHabit({
     (async () => {
       return drizzleOps.readTableUnique(user, { email: email }, log.nest());
     })(),
+    readHabitById({ id: habit, log: log.nest() }),
   ]);
   if (!data.value.success)
     return Result.error("Could not fetch essential data to remove member");
 
-  const [userDetails] = data.value.data;
+  const [userDetails, habitDetails] = data.value.data;
 
   log.trace({ trace: "remove member" });
-  return await drizzleOps.delete(
+  const ret = await drizzleOps.delete(
     habitMembersTable,
     (t) => and(eq(t.member, userDetails.id), eq(t.habit, habit)),
     log.nest(),
   );
+
+  notifService.createNotif({
+    title: "You were removed in habit",
+    body: `You were removed from habit "${habitDetails.name}"`,
+    user: userDetails.id,
+    log: log.nest(),
+  });
+  return ret;
 }
 
 const auth = { isUserInHabit, isAdmin, isMember, isChecker };
