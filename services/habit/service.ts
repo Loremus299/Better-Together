@@ -181,7 +181,10 @@ async function readHabitsByUser({
       db
         .select(getColumns(habitTable))
         .from(habitTable)
-        .innerJoin(habitMembersTable, eq(habitMembersTable.member, user))
+        .innerJoin(
+          habitMembersTable,
+          eq(habitMembersTable.habit, habitTable.id),
+        )
         .where(
           and(
             eq(habitMembersTable.member, user),
@@ -195,7 +198,10 @@ async function readHabitsByUser({
       db
         .select(getColumns(habitTable))
         .from(habitTable)
-        .innerJoin(habitMembersTable, eq(habitMembersTable.member, user))
+        .innerJoin(
+          habitMembersTable,
+          eq(habitMembersTable.habit, habitTable.id),
+        )
         .where(eq(habitMembersTable.member, user)),
       log.nest(),
     );
@@ -277,12 +283,18 @@ async function deleteHabitById({
   log.trace({ trace: "fetching essential data" });
   const allData = await Result.settle([
     readHabitById({ id: habit, log: log.nest() }),
+    readMembersInHabit({
+      habit,
+      roles: [Roles.admin],
+      log,
+      excludeSelf: user,
+    }),
   ]);
 
   if (!allData.value.success)
     return Result.error("Failed to fetch necessary data for updating habit");
 
-  const [habitDetails] = allData.value.data;
+  const [habitDetails, members] = allData.value.data;
 
   log.trace({ trace: "deleting habit" });
   const data = await drizzleOps.delete(
@@ -293,22 +305,13 @@ async function deleteHabitById({
   if (!data.value.success) return Result.error("failed to add member");
 
   log.trace({ trace: "sending notifications to other admins" });
-  (
-    await readMembersInHabit({
-      habit,
-      roles: [Roles.admin],
-      log,
-      excludeSelf: user,
-    })
-  ).mapOk(async (members) => {
-    for (const member of members) {
-      await notifService.createNotif({
-        title: "Admin deleted habit",
-        body: `"${habitDetails.name}" was deleted by admin.`,
-        user: member.member,
-        log: log.nest(),
-      });
-    }
+  members.forEach(async (member) => {
+    await notifService.createNotif({
+      title: "Admin deleted habit",
+      body: `"${habitDetails.name}" was deleted by admin.`,
+      user: member.member,
+      log: log.nest(),
+    });
   });
 
   return data;
@@ -363,7 +366,7 @@ async function addEmailToHabit({
 
   if (!data.value.success) return Result.error("failed to add member");
 
-  notifService.createNotif({
+  await notifService.createNotif({
     title: "You were added in task",
     body: `You were added in habit "${habitDetails.name}"`,
     user: userDetails.id,
@@ -434,7 +437,7 @@ async function removeMemberInHabit({
 
   if (!ret.value.success) return Result.error("failed to add member");
 
-  notifService.createNotif({
+  await notifService.createNotif({
     title: "You were removed in habit",
     body: `You were removed from habit "${habitDetails.name}"`,
     user: userDetails.id,
