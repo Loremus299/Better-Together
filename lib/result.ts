@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ResultType<T, E> =
   | { success: true; data: T }
   | { success: false; error: E };
