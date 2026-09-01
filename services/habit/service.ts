@@ -5,7 +5,7 @@ import drizzleOps from "../ops/drizzle";
 import { eq, getColumns, InferSelectModel, or } from "drizzle-orm";
 import { db } from "@/db";
 
-async function getUserRole({
+async function isUserInHabit({
   user,
   habit,
   log,
@@ -35,7 +35,7 @@ async function isAdmin({
   habit: string;
   log: Logger;
 }): Promise<Result<boolean, string>> {
-  return (await getUserRole({ user, habit, log })).mapOk((t) => t == "admin");
+  return (await isUserInHabit({ user, habit, log })).mapOk((t) => t == "admin");
 }
 
 async function isMember({
@@ -47,7 +47,9 @@ async function isMember({
   habit: string;
   log: Logger;
 }): Promise<Result<boolean, string>> {
-  return (await getUserRole({ user, habit, log })).mapOk((t) => t == "checker");
+  return (await isUserInHabit({ user, habit, log })).mapOk(
+    (t) => t == "checker",
+  );
 }
 
 async function isChecker({
@@ -59,7 +61,9 @@ async function isChecker({
   habit: string;
   log: Logger;
 }): Promise<Result<boolean, string>> {
-  return (await getUserRole({ user, habit, log })).mapOk((t) => t == "member");
+  return (await isUserInHabit({ user, habit, log })).mapOk(
+    (t) => t == "member",
+  );
 }
 
 async function createHabit({
@@ -188,7 +192,7 @@ async function deleteHabitById({
   );
 }
 
-const auth = { getUserRole, isAdmin, isMember, isChecker };
+const auth = { isUserInHabit, isAdmin, isMember, isChecker };
 const habitService = {
   createHabit,
   readHabitById,
