@@ -13,6 +13,7 @@ import {
   EmptyRelations,
   eq,
   getColumns,
+  inArray,
   InferSelectModel,
   ne,
   or,
@@ -323,28 +324,28 @@ async function readMembersInHabit({
   habit,
   roles = [],
   log,
+  excludeSelf,
 }: {
   user: string;
   habit: string;
   roles: Roles[];
   log: Logger;
+  excludeSelf?: boolean;
 }): Promise<Result<InferSelectModel<typeof habitMembersTable>[], string>> {
   log.trace({ layer: "habit service - read members in habit" });
   log.debug({ user, habit, roles });
 
-  const roleSQL = roles.map((item) => eq(habitMembersTable.role, item));
+  const conditions = [
+    eq(habitMembersTable.habit, habit),
+    ...(roles.length > 0 ? [inArray(habitMembersTable.role, roles)] : []),
+    ...(excludeSelf ? [ne(habitMembersTable.member, user)] : []),
+  ];
 
   return await drizzleOps.executeQuery(
     db
       .select()
       .from(habitMembersTable)
-      .where(
-        and(
-          eq(habitMembersTable.habit, habit),
-          or(...roleSQL),
-          ne(habitMembersTable.member, user),
-        ),
-      ),
+      .where(and(...conditions)),
     log,
   );
 }
