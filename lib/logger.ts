@@ -1,3 +1,6 @@
+import { db } from "@/db";
+import { logTable } from "@/db/schema";
+
 const C = {
   reset: "\x1b[0m",
   gray: "\x1b[90m",
@@ -21,30 +24,37 @@ function colorForKey(key: string) {
 
 interface LogEntry {
   key: string;
-  value: unknown;
+  value: string;
   time: number;
 }
 
 type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 
-type LogContext = Array<LogEntry>;
+type LogContext = [Array<LogEntry>, Array<Logger>, number];
 
 export class Logger {
   private readonly context: LogContext;
 
-  public constructor() {
+  /**
+   * Construct a new logger context.
+   **/
+  public constructor(nest?: number) {
     this.context = [
-      {
-        key: "RequestId",
-        value: globalThis.crypto.randomUUID(),
-        time: new Date().getTime(),
-      },
+      [
+        {
+          key: "RequestId",
+          value: globalThis.crypto.randomUUID(),
+          time: new Date().getTime(),
+        },
+      ],
+      [],
+      nest ?? 0,
     ];
   }
 
   private push(type: LogType, data: Record<string, unknown>) {
     for (const [k, v] of Object.entries(data)) {
-      this.context.push({
+      this.context[0].push({
         key: `[${type.toUpperCase().padEnd(5)}] ${k}`,
         value: JSON.stringify(v),
         time: new Date().getTime(),
@@ -52,61 +62,117 @@ export class Logger {
     }
   }
 
+  /**
+   * Creates a new logger instance and appends it to current logContext with a deeper nesting.
+   **/
+  public nest() {
+    const child = new Logger(this.context[2] + 1);
+    this.context[1].push(child);
+    this.data({
+      "sub-logger": `${child.id} @ nest ${child.context[2]}`,
+    });
+    return child;
+  }
+
+  /**
+   * Logs user-provided data or input associated with an operation.
+   **/
   public data(data: Record<string, unknown>) {
     this.push("data", data);
   }
 
+  /**
+   * Logs an error.
+   **/
   public error(data: Record<string, unknown>) {
     this.push("error", data);
   }
 
+  /**
+   * Logs a potential problem.
+   **/
   public warn(data: Record<string, unknown>) {
     this.push("warn", data);
   }
 
+  /**
+   * Logs information about a request, operation, or application state.
+   **/
   public info(data: Record<string, unknown>) {
     this.push("info", data);
   }
 
+  /**
+   * Logging every small little variable and detail.
+   **/
   public debug(data: Record<string, unknown>) {
     this.push("debug", data);
   }
 
+  /**
+   * Logging an operation across multiple functions.
+   **/
   public trace(data: Record<string, unknown>) {
     this.push("trace", data);
   }
 
-  public print() {
-    let lastTime = this.context[0].time;
-    const time = new Date(this.context[0].time);
+  /**
+   * Returns the identifier for the logger context.
+   **/
+  get id() {
+    return this.context[0][0].value;
+  }
+
+  private print() {
+    let lastTime = this.context[0][0].time;
+    const nestPad = "─── ".repeat(this.context[2]);
+    const time = new Date(this.context[0][0].time);
     const pad = (n: number) => String(n).padStart(2, "0");
     const formattedTime =
       `${time.getFullYear()}-${pad(time.getMonth() + 1)}-${pad(time.getDate())}` +
       ` ${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}` +
       `.${pad(time.getMilliseconds())}`;
 
-    const lastLogItem = this.context[this.context.length - 1];
+    const lastLogItem = this.context[0][this.context[0].length - 1];
 
-    console.log(
-      `${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
-    );
+    const line = `${C.blue}${nestPad}┌─ ${this.context[0][0].value} @ ${formattedTime} [NEST = ${this.context[2]}]`;
+    console.log(`${line} ${"─".repeat(150 - line.length)}${C.reset}`);
 
-    for (const logItem of this.context.slice(1)) {
+    for (const logItem of this.context[0].slice(1)) {
       const delta = ("⏱ " + String(logItem.time - lastTime)).padEnd(8);
       const paddedKey = logItem.key.padEnd(30);
       const color = colorForKey(logItem.key);
       const symbol = logItem === lastLogItem ? "└─" : "├─";
 
       console.log(
-        `${color}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
+        `${color}${nestPad}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
       );
 
       lastTime = logItem.time;
     }
-    console.log("\n");
   }
 
-  public getId() {
-    return this.context[0].value as string;
+  private async dumpLogger() {
+    const data = this.context[0];
+    const fun = async (data: LogEntry[]) => {
+      for (const entry of data) {
+        await db
+          .insert(logTable)
+          .values({ key: entry.key, value: entry.value, time: entry.time });
+      }
+    };
+    await fun(data);
+    this.print();
+  }
+
+  /**
+   * Dumps the log context using custom function and prints it to console.
+   **/
+  public async dump() {
+    await this.dumpLogger();
+    const loggers = this.context[1];
+    for (const logger of loggers) {
+      await logger.dump();
+    }
   }
 }

@@ -3,7 +3,7 @@ export type ResultType<T, E> =
   | { success: false; error: E };
 
 export class Result<T, E> {
-  readonly value: ResultType<T, E>;
+  public readonly value: ResultType<T, E>;
 
   private constructor(value: ResultType<T, E>) {
     this.value = value;
@@ -15,6 +15,10 @@ export class Result<T, E> {
 
   public static error<T, E>(error: E): Result<T, E> {
     return new Result<T, E>({ success: false, error: error });
+  }
+
+  get result() {
+    return this.value;
   }
 
   public static async fallback<T, E, V>(
@@ -66,5 +70,30 @@ export class Result<T, E> {
 
   public type() {
     return this.value as ResultType<T, E>;
+  }
+
+  public static async settle<const Vs extends Array<Promise<Result<any, any>>>>(
+    results: Vs,
+  ): Promise<
+    Result<
+      { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
+      null
+    >
+  > {
+    const settled: unknown[] = [];
+    for (const result of results) {
+      const res = await result;
+      if (!res.value.success) {
+        return Result.error(null);
+      } else {
+        settled.push(res.value.data);
+      }
+    }
+
+    return Result.ok(
+      settled as {
+        [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never;
+      },
+    );
   }
 }
