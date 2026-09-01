@@ -64,7 +64,7 @@ async function isMember({
   log: Logger;
 }): Promise<Result<boolean, string>> {
   return (await isUserInHabit({ user, habit, log })).mapOk(
-    (t) => t == "checker",
+    (t) => t == "member",
   );
 }
 
@@ -78,7 +78,7 @@ async function isChecker({
   log: Logger;
 }): Promise<Result<boolean, string>> {
   return (await isUserInHabit({ user, habit, log })).mapOk(
-    (t) => t == "member",
+    (t) => t == "checker",
   );
 }
 
@@ -133,7 +133,7 @@ async function createHabit({
 
   (
     await Result.tryCatch({}, async () => {
-      db.transaction(async (tx) => {
+      await db.transaction(async (tx) => {
         await addTask(
           "Add Task",
           "Add task in habit to do everyday with your members.",
@@ -252,7 +252,6 @@ async function deleteHabitById({
 
   log.trace({ trace: "doing auth check" });
   const admin = await isAdmin({ user, habit, log: log.nest() });
-
   if (!admin.value.success) return Result.error("auth check failed");
   if (!admin.value.data)
     return Result.error("You don't have the authority to perform this action");
@@ -279,7 +278,7 @@ async function addEmailToHabit({
   role: Roles;
 }): Promise<Result<InferSelectModel<typeof habitMembersTable>, string>> {
   log.trace({ layer: "habit service - add email to habit" });
-  log.debug({ user, habit, email });
+  log.debug({ user, habit, email, role });
 
   log.trace({ trace: "necessary data" });
   const allData = await Result.settle([
@@ -350,8 +349,45 @@ async function readMembersInHabit({
   );
 }
 
+async function removeMemberInHabit({
+  member,
+  email,
+  habit,
+  log,
+}: {
+  member: string;
+  email: string;
+  habit: string;
+  log: Logger;
+}): Promise<Result<InferSelectModel<typeof habitMembersTable>, string>> {
+  log.trace({ layer: "habit service - remove member in habit" });
+  log.debug({ member, habit, email });
+
+  log.trace({ trace: "necessary data fetching" });
+  const data = await Result.settle([
+    (async () => {
+      return drizzleOps.readTableUnique(user, { email: email }, log.nest());
+    })(),
+    isAdmin({ user: member, habit, log: log.nest() }),
+  ]);
+  if (!data.value.success)
+    return Result.error("Could not fetch essential data to remove member");
+
+  const [userDetails, admin] = data.value.data;
+  log.trace({ trace: "auth check" });
+  if (!admin)
+    return Result.error("You don't have the authority to perform this action");
+
+  log.trace({ trace: "remove member" });
+  return await drizzleOps.delete(
+    habitMembersTable,
+    (t) => and(eq(t.member, userDetails.id), eq(t.habit, habit)),
+    log.nest(),
+  );
+}
+
 const auth = { isUserInHabit, isAdmin, isMember, isChecker };
-const members = { addEmailToHabit, readMembersInHabit };
+const members = { addEmailToHabit, readMembersInHabit, removeMemberInHabit };
 const habitService = {
   createHabit,
   readHabitById,
