@@ -19,7 +19,13 @@ export const habitTable = pgTable("habit", {
     .$onUpdate(() => new Date()),
 });
 
-export const rolesEnum = pgEnum("roles", ["admin", "member", "checker"]);
+export enum Roles {
+  admin = "admin",
+  member = "member",
+  checker = "checker",
+}
+
+const rolesEnum = pgEnum("roles", Roles);
 
 export const habitMembersTable = pgTable("habitMembers", {
   id: text("id")
@@ -50,11 +56,12 @@ export const habitTasksTable = pgTable("habitTasks", {
     .$onUpdate(() => new Date()),
 });
 
-export const proofStatusEnum = pgEnum("proofStatus", [
-  "pending",
-  "accepted",
-  "declined",
-]);
+export enum ProofStatus {
+  pending = "pending",
+  accepted = "accepted",
+  declined = "declined",
+}
+const proofStatusEnum = pgEnum("proofStatus", ProofStatus);
 
 export const habitProofsTable = pgTable("habitProofs", {
   id: text("id")

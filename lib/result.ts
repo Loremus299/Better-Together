@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ResultType<T, E> =
   | { success: true; data: T }
   | { success: false; error: E };
@@ -73,11 +72,17 @@ export class Result<T, E> {
     return this.value as ResultType<T, E>;
   }
 
-  public static async settle<const Vs extends Array<Promise<Result<any, any>>>>(
+  public static async settle<
+    const Vs extends Array<Promise<Result<unknown, unknown>>>,
+  >(
     results: Vs,
   ): Promise<
     Result<
-      { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
+      {
+        [K in keyof Vs]: Awaited<Vs[K]> extends Result<infer T, unknown>
+          ? T
+          : never;
+      },
       null
     >
   > {
@@ -93,7 +98,7 @@ export class Result<T, E> {
 
     return Result.ok(
       settled as {
-        [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never;
+        [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
       },
     );
   }
