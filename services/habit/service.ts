@@ -226,9 +226,6 @@ async function updateHabitById({
   if (!allData.value.success)
     return Result.error("Failed to fetch necessary data for updating habit");
 
-  if (!allData.value.data[0])
-    return Result.error("You don't have the authority to perform this action");
-
   const [habitDetails] = allData.value.data;
 
   log.trace({ trace: "updating habit" });
@@ -241,6 +238,7 @@ async function updateHabitById({
     (t) => eq(t.id, habit),
     log.nest(),
   );
+  if (!data.value.success) return Result.error("failed to add member");
 
   log.trace({ trace: "sending notifications to other admins" });
   (
@@ -284,9 +282,6 @@ async function deleteHabitById({
   if (!allData.value.success)
     return Result.error("Failed to fetch necessary data for updating habit");
 
-  if (!allData.value.data[0])
-    return Result.error("You don't have the authority to perform this action");
-
   const [habitDetails] = allData.value.data;
 
   log.trace({ trace: "deleting habit" });
@@ -295,6 +290,7 @@ async function deleteHabitById({
     (t) => eq(t.id, habit),
     log.nest(),
   );
+  if (!data.value.success) return Result.error("failed to add member");
 
   log.trace({ trace: "sending notifications to other admins" });
   (
@@ -307,8 +303,8 @@ async function deleteHabitById({
   ).mapOk(async (members) => {
     for (const member of members) {
       await notifService.createNotif({
-        title: "Admin updated habit",
-        body: `"${habitDetails.name}" was updated by admin.`,
+        title: "Admin deleted habit",
+        body: `"${habitDetails.name}" was deleted by admin.`,
         user: member.member,
         log: log.nest(),
       });
@@ -355,7 +351,7 @@ async function addEmailToHabit({
     return Result.error("Member already exists in habit");
 
   log.trace({ trace: "Adding member" });
-  const data = drizzleOps.insert(
+  const data = await drizzleOps.insert(
     habitMembersTable,
     {
       habit: habit,
@@ -364,6 +360,8 @@ async function addEmailToHabit({
     },
     log,
   );
+
+  if (!data.value.success) return Result.error("failed to add member");
 
   notifService.createNotif({
     title: "You were added in task",
@@ -433,6 +431,8 @@ async function removeMemberInHabit({
     (t) => and(eq(t.member, userDetails.id), eq(t.habit, habit)),
     log.nest(),
   );
+
+  if (!ret.value.success) return Result.error("failed to add member");
 
   notifService.createNotif({
     title: "You were removed in habit",
