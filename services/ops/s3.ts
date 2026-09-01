@@ -10,13 +10,10 @@ import {
 import { createId } from "@paralleldrive/cuid2";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-async function createEntry({
-  file,
-  log,
-}: {
-  file: File;
-  log: Logger;
-}): Promise<Result<string, string>> {
+async function createEntry(
+  file: File,
+  log: Logger,
+): Promise<Result<string, string>> {
   log.trace({ layer: "create entry - s3 ops" });
 
   const key = `${createId()}-${file.type.replaceAll("/", "-")}`;
@@ -43,13 +40,10 @@ async function createEntry({
   );
 }
 
-async function readEntry({
-  key,
-  log,
-}: {
-  key: string;
-  log: Logger;
-}): Promise<Result<string, string>> {
+async function readEntry(
+  key: string,
+  log: Logger,
+): Promise<Result<string, string>> {
   log.trace({ layer: "read entry - s3 ops" });
   log.info({ key });
 
@@ -76,13 +70,10 @@ async function readEntry({
   );
 }
 
-async function deleteEntry({
-  key,
-  log,
-}: {
-  key: string;
-  log: Logger;
-}): Promise<Result<undefined, string>> {
+async function deleteEntry(
+  key: string,
+  log: Logger,
+): Promise<Result<undefined, string>> {
   log.trace({ layer: "delete entry - s3 ops" });
   log.info({ key });
 
