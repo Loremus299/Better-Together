@@ -1,3 +1,5 @@
+import { db } from "@/db";
+import { Logger } from "@/lib/logger";
 import {
   and,
   eq,
@@ -28,23 +30,29 @@ type ExecutableQuery<TResult> = {
 };
 
 interface DrizzleOpsInterface {
-  executeQuery: <TResult>(query: ExecutableQuery<TResult>) => Promise<TResult>;
+  executeQuery: <TResult>(
+    query: ExecutableQuery<TResult>,
+    log: Logger,
+  ) => Promise<TResult>;
 
   insert: <T extends AnyPgTable>(
     table: T,
     data: InferInsertModel<T>,
+    log: Logger,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
   readTable: <T extends AnyPgTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
+    log: Logger,
     tx?: DB,
   ) => Promise<InferSelectModel<T>[]>;
 
   readTableUnique: <T extends AnyPgTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
+    log: Logger,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
@@ -52,40 +60,49 @@ interface DrizzleOpsInterface {
     table: T,
     data: Partial<InferInsertModel<T>>,
     condition: Condition<T>,
+    log: Logger,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
   delete: <T extends AnyPgTable>(
     table: T,
     condition: Condition<T>,
+    log: Logger,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 }
 
 const drizzleOps: DrizzleOpsInterface = {
-  async executeQuery(query) {
-    // const { sql, params } = query.toSQL();
-    // console.log(sql) --> debug;
-    // console.log(params) --> debug;
+  async executeQuery(query, log) {
+    log.trace({ layer: "execute query - drizzle ops" });
+
+    const { sql, params } = query.toSQL();
+    log.debug({ query: sql });
+    log.debug({ params: params });
+
     const rows = await query.execute();
-    // console.log(rows) --> debug;
+    log.debug({ rows });
     return rows;
   },
 
-  async insert(table, data, tx) {
-    const t = tx!; //?? db;
-    //console.log(data) --> info;
+  async insert(table, data, log, tx) {
+    log.trace({ layer: "insert - drizzle ops" });
+    const t = tx ?? db;
+    log.data({ data: data });
+
     const [row] = (await drizzleOps.executeQuery(
       t.insert(table).values(data).returning(),
+      log.nest(),
     )) as InferSelectModel<typeof table>[];
 
-    // console.log(row) --> debug;
+    log.debug({ rows: row });
     return row as InferSelectModel<typeof table>;
   },
 
-  async readTable(table, data, tx) {
-    const t = tx!; //?? db;
-    //console.log(data) --> info;
+  async readTable(table, data, log, tx) {
+    log.trace({ layer: "read table - drizzle ops" });
+    const t = tx ?? db;
+    log.info({ data });
 
     const columns = getColumns(table);
     const conditions: SQL[] = [];
@@ -93,7 +110,8 @@ const drizzleOps: DrizzleOpsInterface = {
     for (const [key, value] of Object.entries(data)) {
       if (value !== undefined && key in columns) {
         const column = columns[key as keyof typeof columns];
-        // console.log(column?.name, value) --> info;
+        const k = column?.name ?? "";
+        log.info({ params: `${k} - ${value}` });
         conditions.push(eq(column as AnyColumn, value as never));
       }
     }
@@ -103,20 +121,23 @@ const drizzleOps: DrizzleOpsInterface = {
         .select()
         .from(table as AnyPgTable)
         .where(and(...conditions)),
+      log.nest(),
     )) as InferSelectModel<typeof table>[];
   },
 
-  async readTableUnique(table, data, tx) {
-    const t = tx!; //?? db;
-    //console.log(data) --> info;
+  async readTableUnique(table, data, log, tx) {
+    log.trace({ layer: "read table unique - drizzle ops" });
+    const t = tx ?? db;
+    log.info({ data });
 
     const columns = getColumns(table);
     const conditions: SQL[] = [];
 
     for (const [key, value] of Object.entries(data)) {
       if (value !== undefined && key in columns) {
-        // console.log(column?.name, value) --> info;
         const column = columns[key as keyof typeof columns];
+        const k = column?.name ?? "";
+        log.info({ params: `${k} - ${value}` });
         conditions.push(eq(column as AnyColumn, value as never));
       }
     }
@@ -126,6 +147,7 @@ const drizzleOps: DrizzleOpsInterface = {
         .select()
         .from(table as AnyPgTable)
         .where(and(...conditions)),
+      log.nest(),
     )) as InferSelectModel<typeof table>[];
 
     if (rows.length !== 1) {
@@ -135,22 +157,26 @@ const drizzleOps: DrizzleOpsInterface = {
     }
   },
 
-  async update(table, data, condition, tx) {
-    const t = tx!;
-    //console.log(data) --> info;
+  async update(table, data, condition, log, tx) {
+    log.trace({ layer: "update - drizzle ops" });
+    const t = tx ?? db;
+    log.info({ data });
 
     const [row] = (await drizzleOps.executeQuery(
       t.update(table).set(data).where(condition(table)).returning(),
+      log,
     )) as InferSelectModel<typeof table>[];
 
     return row as InferSelectModel<typeof table>;
   },
 
-  async delete(table, condition, tx) {
-    const t = tx!;
+  async delete(table, condition, log, tx) {
+    log.trace({ layer: "update - drizzle ops" });
+    const t = tx ?? db;
 
     const [row] = (await drizzleOps.executeQuery(
       t.delete(table).where(condition(table)).returning(),
+      log.nest(),
     )) as InferSelectModel<typeof table>[];
 
     return row as InferSelectModel<typeof table>;
