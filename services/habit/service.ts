@@ -3,12 +3,20 @@ import {
   habitTable,
   habitTasksTable,
   Roles,
+  user,
 } from "@/db/schema";
 import { Logger } from "@/lib/logger";
 import { Result } from "@/lib/result";
 import drizzleOps from "../ops/drizzle";
-import { eq, getColumns, InferSelectModel, or } from "drizzle-orm";
+import {
+  EmptyRelations,
+  eq,
+  getColumns,
+  InferSelectModel,
+  or,
+} from "drizzle-orm";
 import { db } from "@/db";
+import { PgAsyncTransaction, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 async function isUserInHabit({
   user,
@@ -103,7 +111,11 @@ async function createHabit({
   if (!addAdmin.value.success) return Result.error(addAdmin.value.error);
 
   log.trace({ trace: "adding default tasks" });
-  const addTask = (task: string, description: string) => {
+  const addTask = (
+    task: string,
+    description: string,
+    tx: PgAsyncTransaction<PgQueryResultHKT, EmptyRelations>,
+  ) => {
     return drizzleOps.insert(
       habitTasksTable,
       {
@@ -112,22 +124,26 @@ async function createHabit({
         habit: habitId,
       },
       log.nest(),
+      tx,
     );
   };
 
-  const defaults = await Result.settle([
-    addTask(
-      "Add tasks",
-      "Add habits you wish to do everyday for admins and mebers.",
-    ),
-    addTask(
-      "Invite partners",
-      "Invite your partners as members or just checkers to hold you accountable and participate in the habit.",
-    ),
-  ]);
-
-  if (!defaults.value.success)
-    log.warn({ error: "Could not add default tasks." });
+  (
+    await Result.tryCatch({}, async () => {
+      db.transaction(async (tx) => {
+        await addTask(
+          "Add Task",
+          "Add task in habit to do everyday with your members.",
+          tx,
+        );
+        await addTask(
+          "Invite partners",
+          "Invite partners as members to participate with you or checkers to hold you accountable.",
+          tx,
+        );
+      });
+    })
+  ).mapError((e) => log.warn({ error: e as string }));
 
   return Result.ok(habit.value.data);
 }
@@ -234,7 +250,7 @@ async function deleteHabitById({
   log.trace({ trace: "doing auth check" });
   const admin = await isAdmin({ user, habit, log: log.nest() });
 
-  if (!admin.value.success) return Result.error(admin.value.error);
+  if (!admin.value.success) return Result.error("auth check failed");
   if (!admin.value.data)
     return Result.error("You don't have the authority to perform this action");
 
@@ -246,7 +262,62 @@ async function deleteHabitById({
   );
 }
 
+async function addEmailToHabit({
+  admin,
+  habit,
+  email,
+  log,
+  role,
+}: {
+  admin: string;
+  habit: string;
+  email: string;
+  log: Logger;
+  role: Roles;
+}): Promise<Result<InferSelectModel<typeof habitMembersTable>, string>> {
+  log.trace({ layer: "habit service - add email to habit" });
+  log.debug({ user, habit, email });
+
+  log.trace({ trace: "necessary data" });
+  const allData = await Result.settle([
+    drizzleOps.readTableUnique(user, { email }, log.nest()),
+    isAdmin({ habit, user: admin, log: log.nest() }),
+  ]);
+  if (!allData.value.success)
+    return Result.error("Could not fetch essential data to update task");
+
+  const [userDetails, isUserAdmin] = allData.value.data;
+
+  log.trace({ trace: "Duplication check" });
+  const memberExists = await drizzleOps.readTableUnique(
+    habitMembersTable,
+    {
+      habit: habit,
+      member: userDetails.id,
+    },
+    log,
+  );
+  if (memberExists.value.success)
+    return Result.error("Member already exists in habit");
+
+  log.trace({ trace: "doing auth check" });
+  if (!isUserAdmin)
+    return Result.error("You don't have the authority to add a member");
+
+  log.trace({ trace: "Adding member" });
+  return await drizzleOps.insert(
+    habitMembersTable,
+    {
+      habit: habit,
+      member: userDetails.id,
+      role,
+    },
+    log,
+  );
+}
+
 const auth = { isUserInHabit, isAdmin, isMember, isChecker };
+const members = { addEmailToHabit };
 const habitService = {
   createHabit,
   readHabitById,
@@ -254,5 +325,6 @@ const habitService = {
   updateHabitById,
   deleteHabitById,
   auth,
+  members,
 };
 export default habitService;
