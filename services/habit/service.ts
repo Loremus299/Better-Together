@@ -9,10 +9,12 @@ import { Logger } from "@/lib/logger";
 import { Result } from "@/lib/result";
 import drizzleOps from "../ops/drizzle";
 import {
+  and,
   EmptyRelations,
   eq,
   getColumns,
   InferSelectModel,
+  ne,
   or,
 } from "drizzle-orm";
 import { db } from "@/db";
@@ -316,8 +318,39 @@ async function addEmailToHabit({
   );
 }
 
+async function readMembersInHabit({
+  user,
+  habit,
+  roles = [],
+  log,
+}: {
+  user: string;
+  habit: string;
+  roles: Roles[];
+  log: Logger;
+}): Promise<Result<InferSelectModel<typeof habitMembersTable>[], string>> {
+  log.trace({ layer: "habit service - read members in habit" });
+  log.debug({ user, habit, roles });
+
+  const roleSQL = roles.map((item) => eq(habitMembersTable.role, item));
+
+  return await drizzleOps.executeQuery(
+    db
+      .select()
+      .from(habitMembersTable)
+      .where(
+        and(
+          eq(habitMembersTable.habit, habit),
+          or(...roleSQL),
+          ne(habitMembersTable.member, user),
+        ),
+      ),
+    log,
+  );
+}
+
 const auth = { isUserInHabit, isAdmin, isMember, isChecker };
-const members = { addEmailToHabit };
+const members = { addEmailToHabit, readMembersInHabit };
 const habitService = {
   createHabit,
   readHabitById,
