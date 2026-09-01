@@ -6,9 +6,7 @@ export const notificationTable = pgTable("notification", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  user: text("user")
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
+  user: text("user").references(() => user.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   body: text("body").notNull(),
   read: boolean("read").notNull().default(false),
