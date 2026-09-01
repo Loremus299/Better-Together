@@ -50,7 +50,7 @@ async function readEntry({
   key: string;
   log: Logger;
 }): Promise<Result<string, string>> {
-  log.trace({ layer: "s3 ops read" });
+  log.trace({ layer: "read entry - s3 ops" });
   log.info({ key });
 
   return (
@@ -83,7 +83,7 @@ async function deleteEntry({
   key: string;
   log: Logger;
 }): Promise<Result<undefined, string>> {
-  log.trace({ layer: "ops s3 service" });
+  log.trace({ layer: "delete entry - s3 ops" });
   log.info({ key });
 
   return (
