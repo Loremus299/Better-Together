@@ -126,8 +126,8 @@ export default async function Page({
                     css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
                   />
                 )}
-                <div>
-                  <h1 className="text-5xl font-bold tracking-tight">
+                <div className="-mt-1">
+                  <h1 className="text-4xl font-bold tracking-tight">
                     {habitdata.value.data.name}
                   </h1>
                   <h2 className="text-muted-foreground">
