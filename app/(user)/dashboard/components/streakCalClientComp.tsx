@@ -22,6 +22,14 @@ function numToCol(num: number) {
   return "bg-muted";
 }
 
+function dateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export default function StreakCalClientComp({
   data,
 }: {
@@ -37,12 +45,18 @@ export default function StreakCalClientComp({
       today.getDate() - fill,
     );
 
-    map.set(date.toISOString(), 0);
+    map.set(dateKey(date), 0);
   }
 
   for (const point of data) {
-    const date = new Date(Number(point.timeStamp) * 1000).toISOString();
-    map.set(date, map.get(date) ?? 0 + 1);
+    const timestamp = Number(point.timeStamp);
+
+    const date = new Date(timestamp * 1000);
+    const key = dateKey(date);
+
+    if (map.has(key)) {
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
   }
 
   return (
