@@ -19,7 +19,10 @@ export default async function Page() {
 
   return (
     <MaxWContainer>
-      <ResizablePanelGroup orientation="vertical" className="min-h-screen">
+      <ResizablePanelGroup
+        orientation="vertical"
+        className="min-h-screen pt-1 pb-1"
+      >
         <ResizablePanel defaultSize={"4em"}>
           <ResizablePanelGroup orientation="horizontal">
             <ResizablePanel defaultSize={"4em"} className="p-1">

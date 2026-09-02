@@ -32,7 +32,7 @@ export default async function HabitDisplay() {
 
   if (habits.value.data.length === 0) {
     return (
-      <div className="w-full h-full grid place-items-center">
+      <div className="w-full h-full grid place-items-center bg-muted rounded-md">
         <div className="text-center">
           You are not member of any habit. Either{" "}
           <Link href={"/new"} className="text-muted-foreground underline">

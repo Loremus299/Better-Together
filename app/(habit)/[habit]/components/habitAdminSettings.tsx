@@ -46,52 +46,28 @@ export default function HabitAdminSettings({
   const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   return (
-    <div>
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setUpdateDetailsOpen(true)}
-      >
+    <div className="bg-muted rounded-md h-24 grid grid-cols-2 -mt-1">
+      <Button variant={"ghost"} onClick={() => setUpdateDetailsOpen(true)}>
         <IconPencil />
       </Button>
 
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setUpdateHeaderOpen(true)}
-      >
+      <Button variant={"ghost"} onClick={() => setUpdateHeaderOpen(true)}>
         <IconPhotoPlus />
       </Button>
 
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setAddMemberOpen(true)}
-      >
+      <Button variant={"ghost"} onClick={() => setAddMemberOpen(true)}>
         <IconMailPlus />
       </Button>
 
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setAddTaskOpen(true)}
-      >
+      <Button variant={"ghost"} onClick={() => setAddTaskOpen(true)}>
         <IconCircleCheck />
       </Button>
 
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setRemoveMemberOpen(true)}
-      >
+      <Button variant={"ghost"} onClick={() => setRemoveMemberOpen(true)}>
         <IconMailMinus className="text-destructive" />
       </Button>
 
-      <Button
-        variant={"ghost"}
-        className="border hover:border-accent border-muted-background rounded-none"
-        onClick={() => setDeleteHabitOpen(true)}
-      >
+      <Button variant={"ghost"} onClick={() => setDeleteHabitOpen(true)}>
         <IconTrash className="text-destructive" />
       </Button>
 
