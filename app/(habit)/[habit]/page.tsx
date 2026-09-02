@@ -158,8 +158,8 @@ export default async function Page({
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="m-1">
-              <div className="rounded-md bg-card">
-                <div className="flex flex-wrap gap-4 p-4">
+              <div className="rounded-md bg-card h-full">
+                <div className="flex flex-wrap gap-4 p-4 bg-card rounded-md">
                   {proofArr.map((item) => (
                     <ProofDisplay
                       id={item.id}

@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import HabitDisplay from "./components/habitDisplay";
 import IncompleteTaskDisplay from "./components/incompleteTaskDisplay";
 import StreakCalDisplay from "./components/streakCalDisplay";
+import Account from "./components/account";
 
 export default async function Page() {
   const session = await getSession();
@@ -26,9 +27,7 @@ export default async function Page() {
         <ResizablePanel defaultSize={"4em"}>
           <ResizablePanelGroup orientation="horizontal">
             <ResizablePanel defaultSize={"4em"} className="p-1">
-              <div className="h-full w-full grid place-items-center bg-card rounded-md">
-                A
-              </div>
+              <Account />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
