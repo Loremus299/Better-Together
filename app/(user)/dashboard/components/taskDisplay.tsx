@@ -7,10 +7,12 @@ export default async function TaskDisplay({
   id,
   name,
   description,
+  user,
 }: {
   id: string;
   name: string;
   description: string;
+  user: string;
 }) {
   const log = new Logger();
   const proof = await habitService.readProofsByTask({ task: id, log });
@@ -25,6 +27,7 @@ export default async function TaskDisplay({
       name={name}
       description={description}
       proofList={proof.value.data}
+      user={user}
     />
   );
 }

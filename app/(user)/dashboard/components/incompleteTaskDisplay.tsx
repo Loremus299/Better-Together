@@ -25,6 +25,7 @@ export default async function IncompleteTaskDisplay({
             id={item.id}
             name={item.task}
             description={item.description}
+            user={user}
           />
         ))}
       </div>

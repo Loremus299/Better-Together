@@ -4,15 +4,18 @@ export default function TaskDisplayClient({
   name,
   description,
   proofList,
+  user,
 }: {
   name: string;
   description: string;
-  proofList: { timeStamp: string; proofStatus: string }[];
+  proofList: { timeStamp: string; proofStatus: string; user: string }[];
+  user: string;
 }) {
   const today = new Date();
 
   const isDoneToday = proofList.some((proof) => {
     const proofDate = new Date(Number(proof.timeStamp) * 1000);
+    const rightUser = proof.user === user;
     const isFromToday =
       proofDate.getFullYear() === today.getFullYear() &&
       proofDate.getMonth() === today.getMonth() &&
@@ -20,7 +23,8 @@ export default function TaskDisplayClient({
 
     return (
       isFromToday &&
-      ["accepted", "declined", "pending"].includes(proof.proofStatus)
+      ["accepted", "declined", "pending"].includes(proof.proofStatus) &&
+      rightUser
     );
   });
 
