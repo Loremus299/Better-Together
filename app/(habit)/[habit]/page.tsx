@@ -45,7 +45,11 @@ export default async function Page({
     log,
   });
   const habitdata = await habitService.readHabit({ habit, log });
-  const members = await habitService.readMembersByHabit({ habit, log });
+  const members = await habitService.readMembersByHabit({
+    habit,
+    log,
+    checksAndAdmins: true,
+  });
   const tasks = await habitService.readTasksByHabit({ habit, log });
 
   if (
