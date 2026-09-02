@@ -68,8 +68,13 @@ export default function ProofDisplayClient({
             {proofStatus}
           </span>{" "}
           <br />
-          For task: {task} <br />
-          Submitted on: {isSubmittedToday ? "today" : date.getDate()}
+          For task: <span className="text-foreground">{task}</span> <br />
+          Submitted on:{" "}
+          <span className="text-foreground">
+            {isSubmittedToday
+              ? "Today"
+              : `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} `}
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="wrap-anywhere">{description}</CardContent>
