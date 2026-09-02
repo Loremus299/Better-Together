@@ -46,8 +46,8 @@ export default function StreakCalClientComp({
   }
 
   return (
-    <div className="w-full h-full @container p-4 overflow-x-scroll">
-      <div className="grid grid-flow-col grid-rows-7 gap-1">
+    <div className="w-full h-full @container overflow-x-scroll bg-muted rounded-md">
+      <div className="grid grid-flow-col grid-rows-7 gap-1 p-4 ">
         {[...map.entries()].map((item) => (
           <div
             key={item[0]}

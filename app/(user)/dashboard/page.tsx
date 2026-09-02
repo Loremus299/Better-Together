@@ -19,60 +19,49 @@ export default async function Page() {
 
   return (
     <MaxWContainer>
-      <main className="border">
-        <ResizablePanelGroup orientation="vertical" className="min-h-screen">
-          <ResizablePanel defaultSize={"4em"}>
-            <ResizablePanelGroup orientation="horizontal">
-              <ResizablePanel
-                defaultSize={"4em"}
-                className="hover:border hover:border-chart-2"
-              >
-                <div className="h-full w-full grid place-items-center">
-                  Account
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel className="hover:border hover:border-chart-2">
-                <div className="h-full w-full grid place-items-center">
-                  Navbar
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel
-                defaultSize={"4em"}
-                className="hover:border hover:border-chart-2"
-              >
-                <div className="h-full w-full grid place-items-center">
-                  <NotifDisplay />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel>
-            <ResizablePanelGroup orientation="horizontal">
-              <ResizablePanel
-                defaultSize={"70%"}
-                className="hover:border hover:border-chart-2"
-              >
-                <ResizablePanelGroup orientation="vertical">
-                  <ResizablePanel defaultSize={"8.5em"}>
-                    <StreakCalDisplay user={session.user.id} />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel>
-                    <HabitDisplay />
-                  </ResizablePanel>
-                </ResizablePanelGroup>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel>
-                <IncompleteTaskDisplay user={session.user.id} />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </main>
+      <ResizablePanelGroup orientation="vertical" className="min-h-screen">
+        <ResizablePanel defaultSize={"4em"}>
+          <ResizablePanelGroup orientation="horizontal">
+            <ResizablePanel defaultSize={"4em"} className="p-1">
+              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+                A
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel className="p-1">
+              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+                Navbar
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={"4em"} className="p-1">
+              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+                <NotifDisplay />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel>
+          <ResizablePanelGroup orientation="horizontal">
+            <ResizablePanel defaultSize={"70%"} className="">
+              <ResizablePanelGroup orientation="vertical">
+                <ResizablePanel defaultSize={"8.5em"} className="p-1">
+                  <StreakCalDisplay user={session.user.id} />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel className="p-1">
+                  <HabitDisplay />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel className="p-1">
+              <IncompleteTaskDisplay user={session.user.id} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </MaxWContainer>
   );
 }
