@@ -46,7 +46,7 @@ export default function HabitAdminSettings({
   const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   return (
-    <div className="bg-muted rounded-md h-24 grid grid-cols-2 -mt-1">
+    <div className="bg-card rounded-md h-24 grid grid-cols-2 -mt-1">
       <Button variant={"ghost"} onClick={() => setUpdateDetailsOpen(true)}>
         <IconPencil />
       </Button>

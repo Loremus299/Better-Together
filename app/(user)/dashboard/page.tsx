@@ -26,19 +26,19 @@ export default async function Page() {
         <ResizablePanel defaultSize={"4em"}>
           <ResizablePanelGroup orientation="horizontal">
             <ResizablePanel defaultSize={"4em"} className="p-1">
-              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+              <div className="h-full w-full grid place-items-center bg-card rounded-md">
                 A
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
-              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+              <div className="h-full w-full grid place-items-center bg-card rounded-md">
                 Navbar
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={"4em"} className="p-1">
-              <div className="h-full w-full grid place-items-center bg-muted rounded-md">
+              <div className="h-full w-full grid place-items-center bg-card rounded-md">
                 <NotifDisplay />
               </div>
             </ResizablePanel>
@@ -49,7 +49,7 @@ export default async function Page() {
           <ResizablePanelGroup orientation="horizontal">
             <ResizablePanel defaultSize={"70%"}>
               <ResizablePanelGroup orientation="vertical">
-                <ResizablePanel defaultSize={"8.5em"} className="p-1">
+                <ResizablePanel defaultSize={"9.25em"} className="p-1">
                   <StreakCalDisplay user={session.user.id} />
                 </ResizablePanel>
                 <ResizableHandle withHandle />

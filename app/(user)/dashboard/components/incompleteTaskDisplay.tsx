@@ -17,7 +17,7 @@ export default async function IncompleteTaskDisplay({
   }
 
   return (
-    <div className="w-full h-full @container p-4 bg-muted rounded-md">
+    <div className="w-full h-full @container p-4 bg-card rounded-md">
       <div className="grid gap-2">
         {tasks.value.data.flat().map((item) => (
           <TaskDisplay

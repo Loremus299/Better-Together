@@ -32,7 +32,7 @@ export default async function HabitDisplay() {
 
   if (habits.value.data.length === 0) {
     return (
-      <div className="w-full h-full grid place-items-center bg-muted rounded-md">
+      <div className="w-full h-full grid place-items-center bg-card rounded-md">
         <div className="text-center">
           You are not member of any habit. Either{" "}
           <Link href={"/new"} className="text-muted-foreground underline">
@@ -46,7 +46,7 @@ export default async function HabitDisplay() {
   }
 
   return (
-    <div className="w-full h-full @container bg-muted rounded-md">
+    <div className="w-full h-full @container bg-card rounded-md">
       <div className="columns @max-[500px]:columns-1 @max-[800px]:columns-2 @max-[1100px]:columns-3 columns-4 gap-4 p-4 overflow-y-scroll">
         {habits.value.data.map((item) => (
           <Link href={`/${item.id}`} key={item.id} className="h-max">

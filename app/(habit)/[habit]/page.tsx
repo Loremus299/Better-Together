@@ -89,7 +89,7 @@ export default async function Page({
           {isAdmin.value.data ? (
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel className="p-1 h-full -mt-1">
-                <div className="w-full p-4 flex gap-4 bg-muted rounded-md h-24">
+                <div className="w-full p-4 flex gap-4 bg-card rounded-md h-24">
                   {habitdata.value.data.header && (
                     <ImageById
                       id={habitdata.value.data.header}
@@ -118,20 +118,22 @@ export default async function Page({
               </ResizablePanel>
             </ResizablePanelGroup>
           ) : (
-            <div className="w-full h-full p-4 flex gap-4 hover:border hover:border-chart-2">
-              {habitdata.value.data.header && (
-                <ImageById
-                  id={habitdata.value.data.header}
-                  css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
-                />
-              )}
-              <div>
-                <h1 className="text-5xl font-bold tracking-tight">
-                  {habitdata.value.data.name}
-                </h1>
-                <h2 className="text-muted-foreground">
-                  {habitdata.value.data.description}
-                </h2>
+            <div className="w-full h-full p-1">
+              <div className="w-full h-full p-4 flex gap-4 bg-card rounded-md">
+                {habitdata.value.data.header && (
+                  <ImageById
+                    id={habitdata.value.data.header}
+                    css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
+                  />
+                )}
+                <div>
+                  <h1 className="text-5xl font-bold tracking-tight">
+                    {habitdata.value.data.name}
+                  </h1>
+                  <h2 className="text-muted-foreground">
+                    {habitdata.value.data.description}
+                  </h2>
+                </div>
               </div>
             </div>
           )}
@@ -140,7 +142,7 @@ export default async function Page({
         <ResizablePanel>
           <ResizablePanelGroup>
             <ResizablePanel defaultSize={"75%"} className="p-1">
-              <div className="p-4 grid gap-4 bg-muted w-full h-full rounded-md">
+              <div className="p-4 grid gap-4 bg-card w-full h-full rounded-md">
                 <div>
                   {tasks.value.data.map((task) => (
                     <TaskDisplay
@@ -156,8 +158,8 @@ export default async function Page({
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
-              <div className="h-full rounded-md bg-muted">
-                <div className="flex flex-wrap gap-4 bg-muted">
+              <div className="h-full rounded-md bg-card">
+                <div className="flex flex-wrap gap-4 p-4">
                   {proofArr.map((item) => (
                     <ProofDisplay
                       id={item.id}
