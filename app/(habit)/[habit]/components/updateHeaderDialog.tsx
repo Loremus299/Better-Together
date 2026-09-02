@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import z from "zod";
 import { updateHeaderAction } from "../action";
 import FormController from "@/components/formController";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { IconPhoto } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import ImageInput from "@/components/badcn/imageInput";
 
 const updateHeaderSchema = z.object({
   file: z.file(),
@@ -78,10 +78,8 @@ export default function UpdateHeaderDialog({
             name="file"
             placeholder=""
             render={({ field, fieldState }) => (
-              <Input
+              <ImageInput
                 aria-invalid={fieldState.invalid}
-                type="file"
-                accept="image/png, image/gif, image/jpeg"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   field.onChange(file);

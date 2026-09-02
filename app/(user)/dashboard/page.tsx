@@ -44,7 +44,7 @@ export default async function Page() {
         <ResizableHandle withHandle />
         <ResizablePanel>
           <ResizablePanelGroup orientation="horizontal">
-            <ResizablePanel defaultSize={"70%"} className="">
+            <ResizablePanel defaultSize={"70%"}>
               <ResizablePanelGroup orientation="vertical">
                 <ResizablePanel defaultSize={"8.5em"} className="p-1">
                   <StreakCalDisplay user={session.user.id} />

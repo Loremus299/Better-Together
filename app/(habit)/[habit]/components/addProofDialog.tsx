@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import { IconPhotoPlus } from "@tabler/icons-react";
 import FormController from "@/components/formController";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
+import ImageInput from "@/components/badcn/imageInput";
 
 const addProofSchema = z.object({
   id: z.string().min(1),
@@ -126,47 +126,13 @@ export default function AddProofDialog({
             name="media"
             placeholder=""
             render={({ field, fieldState }) => (
-              <div
-                tabIndex={0}
-                onPaste={(event) => {
-                  const item = Array.from(event.clipboardData.items).find(
-                    (item) =>
-                      item.kind === "file" &&
-                      ["image/png", "image/jpeg"].includes(item.type),
-                  );
-
-                  const file = item?.getAsFile();
-
-                  if (!file) return;
-
-                  event.preventDefault();
+              <ImageInput
+                aria-invalid={fieldState.invalid}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
                   field.onChange(file);
                 }}
-                className="rounded-md border border-dashed p-4 text-sm text-muted-foreground outline-none focus:ring-2 grid place-items-center"
-              >
-                <label
-                  htmlFor={`media-${id}`}
-                  className="cursor-pointer underline"
-                >
-                  Choose an image
-                </label>{" "}
-                or focus here and press Ctrl+V / Cmd+V.
-                <Input
-                  id={`media-${id}`}
-                  aria-invalid={fieldState.invalid}
-                  type="file"
-                  accept="image/png, image/jpeg"
-                  className="hidden"
-                  onChange={(event) => {
-                    field.onChange(event.target.files?.[0]);
-                  }}
-                />
-                {field.value && (
-                  <p className="mt-2 text-xs text-foreground text-center">
-                    {field.value.name}
-                  </p>
-                )}
-              </div>
+              />
             )}
           />
           <Button type="submit">

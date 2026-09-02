@@ -19,7 +19,7 @@ type Props = Omit<Omit<ComponentProps<typeof Input>, "accept">, "className"> & {
 };
 
 export default function ImageInput({
-  accepts = ["image/png", "image/jpeg", "image/gif", "image/webp"],
+  accepts = ["image/png", "image/jpeg", "image/gif"],
   className,
   onChange = () => null,
   ...props
@@ -136,7 +136,7 @@ export default function ImageInput({
                 >
                   X
                 </Button>
-                <div className="aspect-video overflow-y-scroll">
+                <div className="aspect-video overflow-y-scroll border rounded-md border-dashed">
                   <img
                     alt={item.name}
                     src={URL.createObjectURL(item)}
