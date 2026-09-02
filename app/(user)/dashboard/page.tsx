@@ -53,13 +53,13 @@ export default async function Page() {
                   <StreakCalDisplay user={session.user.id} />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel className="p-1">
+                <ResizablePanel className="m-1">
                   <HabitDisplay />
                 </ResizablePanel>
               </ResizablePanelGroup>
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel className="p-1">
+            <ResizablePanel className="m-1">
               <IncompleteTaskDisplay user={session.user.id} />
             </ResizablePanel>
           </ResizablePanelGroup>
