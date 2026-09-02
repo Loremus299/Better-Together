@@ -117,7 +117,9 @@ export default async function Page({
                   name={habitdata.value.data.name}
                   description={habitdata.value.data.description}
                   habit={habit}
-                  members={members.value.data}
+                  members={members.value.data.filter(
+                    (m) => m.id === session.user.id,
+                  )}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>
