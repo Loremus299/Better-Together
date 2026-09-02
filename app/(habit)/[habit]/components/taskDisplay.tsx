@@ -62,7 +62,7 @@ export default async function TaskDisplay({
           {!isChecker.value.data && <AddProofDialog description="" id={task} />}
         </div>
       </div>
-      <p className="text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground tracking-tighter">{description}</p>
     </div>
   );
 }

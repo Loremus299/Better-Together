@@ -89,7 +89,7 @@ export default async function Page({
           {isAdmin.value.data ? (
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel className="p-1 h-full -mt-1">
-                <div className="w-full p-4 flex gap-4 bg-card rounded-md h-24">
+                <div className="w-full p-4 flex gap-4 bg-card rounded-md h-24 overflow-y-hidden">
                   {habitdata.value.data.header && (
                     <ImageById
                       id={habitdata.value.data.header}
@@ -143,7 +143,7 @@ export default async function Page({
           <ResizablePanelGroup>
             <ResizablePanel defaultSize={"75%"} className="p-1">
               <div className="p-4 grid gap-4 bg-card w-full h-full rounded-md">
-                <div>
+                <div className="flex flex-col gap-2">
                   {tasks.value.data.map((task) => (
                     <TaskDisplay
                       habit={habit}

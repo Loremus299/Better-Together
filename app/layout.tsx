@@ -1,10 +1,22 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Poppins, Lora, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-const geistSans = Geist({
-  variable: "--font-sans",
+
+const fontSans = Poppins({
   subsets: ["latin"],
+  variable: "--font-sans",
+  weight: "400",
+});
+
+const fontSerif = Lora({
+  subsets: ["latin"],
+  variable: "--font-serif",
+});
+
+const fontMono = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -18,9 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full ${geistSans.variable}`}>
-      <body className="antialiased dark">
-        <Toaster position={"top-center"} />
+    <html lang="en">
+      <body
+        className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased h-full dark`}
+      >
+        <Toaster position="top-center" />
         {children}
       </body>
     </html>

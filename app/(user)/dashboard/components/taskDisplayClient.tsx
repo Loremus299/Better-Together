@@ -32,7 +32,7 @@ export default function TaskDisplayClient({
     return (
       <div className="tracking-tight">
         <h3 className="font-semibold">{name}</h3>
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground tracking-tighter">{description}</p>
       </div>
     );
   }

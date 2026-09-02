@@ -56,7 +56,9 @@ export default async function HabitDisplay() {
                 <CardTitle className="flex gap-2 items-center">
                   {item.name}
                 </CardTitle>
-                <CardDescription>{item.description}</CardDescription>
+                <CardDescription className="tracking-tight">
+                  {item.description}
+                </CardDescription>
               </CardHeader>
             </Card>
           </Link>
