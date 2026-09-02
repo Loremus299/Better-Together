@@ -286,7 +286,7 @@ async function addMemberAsChecker({
 
   await notifOps.addNotif({
     user: userDetails.value.data.id,
-    title: `You were added in habit "${habitData.value.data.name} as a checker"`,
+    title: `You were added in habit "${habitData.value.data.name}" as a checker`,
     body: "If not you, ask to removed and check how your email was added. This can be dangerous. (ᵕ•́ -•̀)",
     log,
   });
@@ -634,7 +634,7 @@ async function createProof({
     await notifOps.addNotif({
       user: member.id,
       title: `Proof added in habit ${habitData.value.data.name}`,
-      body: `A new proof was added to habit ${habitData.value.data.name} for task ${taskDetails.value.data.task}. You should go and verify it (˶˃ ᵕ ˂˶) .ᐟ.ᐟ`,
+      body: `A new proof was added to habit "${habitData.value.data.name}" for task "${taskDetails.value.data.task}." You should go and verify it (˶˃ ᵕ ˂˶) .ᐟ.ᐟ`,
       log,
     });
   }
