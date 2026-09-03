@@ -115,7 +115,7 @@ export default async function Page({
                   className={cn(
                     buttonVariants({ variant: "secondary" }),
                     "truncate justify-start",
-                    t.id === habit ? "bg-primary" : "bg-secondary",
+                    t.id === habit ? "bg-primary" : "",
                   )}
                 >
                   <div>
