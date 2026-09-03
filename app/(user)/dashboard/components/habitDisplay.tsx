@@ -1,4 +1,3 @@
-import { habitService } from "@/app/api/habit/service";
 import ImageById from "@/components/imageById";
 import {
   Card,
@@ -11,26 +10,25 @@ import { getSession } from "@/lib/server-util";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function HabitDisplay() {
+export default async function HabitDisplay({
+  habits,
+}: {
+  habits: {
+    name: string;
+    description: string;
+    header: string | null;
+    id: string;
+  }[];
+}) {
   const log = new Logger();
   const session = await getSession();
   if (!session) {
     redirect("/auth/login");
   }
 
-  const habits = await habitService.readHabitsByUser({
-    user: session.user.id,
-    log,
-  });
-
-  if (!habits.value.success) {
-    log.print();
-    redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
-  }
-
   log.print();
 
-  if (habits.value.data.length === 0) {
+  if (habits.length === 0) {
     return (
       <div className="w-full h-full grid place-items-center bg-card rounded-md">
         <div className="text-center">
@@ -48,7 +46,7 @@ export default async function HabitDisplay() {
   return (
     <div className="w-full h-full @container bg-card rounded-md">
       <div className="columns @max-[500px]:columns-1 @max-[800px]:columns-2 @max-[1100px]:columns-3 columns-4 gap-4 p-4 overflow-y-scroll bg-card rounded-md">
-        {habits.value.data.map((item) => (
+        {habits.map((item) => (
           <Link href={`/${item.id}`} key={item.id} className="h-max">
             <Card className="hover:scale-105 hover:rotate-6 duration-300 transition hover:drop-shadow-2xl mb-4 break-inside-avoid">
               {item.header && <ImageById id={item.header} />}

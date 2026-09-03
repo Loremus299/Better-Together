@@ -13,11 +13,25 @@ import StreakCalDisplay from "./components/streakCalDisplay";
 import Account from "./components/account";
 import Link from "next/link";
 import { IconPlus } from "@tabler/icons-react";
+import Navbar from "@/components/navbar";
+import { habitService } from "@/app/api/habit/service";
+import { Logger } from "@/lib/logger";
 
 export default async function Page() {
+  const log = new Logger();
   const session = await getSession();
   if (!session) {
     redirect("auth/login");
+  }
+
+  const habits = await habitService.readHabitsByUser({
+    user: session.user.id,
+    log,
+  });
+
+  if (!habits.value.success) {
+    log.print();
+    redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
   }
 
   return (
@@ -41,9 +55,11 @@ export default async function Page() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
-              <div className="h-full w-full grid place-items-center bg-card rounded-md">
-                Navbar
-              </div>
+              <Navbar
+                currentTab="dashboard"
+                habits={habits.value.data}
+                landscape={true}
+              />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={"4em"} className="p-1">
@@ -63,7 +79,7 @@ export default async function Page() {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel className="m-1">
-                  <HabitDisplay />
+                  <HabitDisplay habits={habits.value.data} />
                 </ResizablePanel>
               </ResizablePanelGroup>
             </ResizablePanel>

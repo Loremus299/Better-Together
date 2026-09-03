@@ -15,10 +15,7 @@ import TaskDisplay from "./components/taskDisplay";
 import { InferSelectModel } from "drizzle-orm";
 import { habitProofsTable } from "@/db/schema";
 import ProofDisplay from "./components/proofDisplay";
-import { buttonVariants } from "@/components/ui/button";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { IconHome } from "@tabler/icons-react";
+import Navbar from "@/components/navbar";
 
 export default async function Page({
   params,
@@ -97,35 +94,7 @@ export default async function Page({
     <MaxWContainer>
       <ResizablePanelGroup>
         <ResizablePanel defaultSize={"3.5em"} className="pt-2 pb-2 pr-1">
-          <div className="bg-card w-full h-full rounded-md p-2">
-            <div className="grid gap-2">
-              <Link
-                href={"/dashboard"}
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "truncate justify-start",
-                )}
-              >
-                <IconHome /> <span className="ml-1.5">Dashboard</span>
-              </Link>
-              {allHabits.value.data.map((t, i) => (
-                <Link
-                  key={t.id}
-                  href={`/${t.id}`}
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "truncate justify-start",
-                    t.id === habit ? "bg-primary" : "",
-                  )}
-                >
-                  <div>
-                    <span className="ml-1 mr-4">{i + 1}</span>
-                    <span>{t.name}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <Navbar currentTab={habit} habits={allHabits.value.data} />
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel>
