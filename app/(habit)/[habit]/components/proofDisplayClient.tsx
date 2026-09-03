@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function ProofDisplayClient({
   id,
@@ -79,11 +80,28 @@ export default function ProofDisplayClient({
       </CardHeader>
       <CardContent className="wrap-anywhere">{description}</CardContent>
       <CardFooter className="grid gap-2">
-        <img
-          src={url}
-          alt={description ?? ""}
-          className="rounded-xl wrap-anywhere"
-        />
+        {url && (
+          <Dialog>
+            <DialogTrigger
+              nativeButton={true}
+              render={
+                <img
+                  src={url}
+                  alt={description ?? "Proof image"}
+                  className="cursor-crosshair rounded-xl wrap-anywhere"
+                />
+              }
+            />
+
+            <DialogContent className={"w-2xl"}>
+              <img
+                src={url}
+                alt={description ?? "Proof image"}
+                className="w-full"
+              />
+            </DialogContent>
+          </Dialog>
+        )}
         {proofStatus !== "pending" ? null : isSelf ? (
           <Button
             onClick={async () => {

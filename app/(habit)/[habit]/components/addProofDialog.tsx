@@ -24,7 +24,9 @@ const addProofSchema = z.object({
   description: z.string(),
   media: z
     .file()
-    .refine((item) => ["image/png", "image/jpeg"].includes(item.type))
+    .refine((item) =>
+      ["image/png", "image/jpeg", "image/gif"].includes(item.type),
+    )
     .refine((file) => file.size < 4.5 * 1024 * 1024)
     .optional(),
 });
