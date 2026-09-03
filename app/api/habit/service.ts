@@ -217,7 +217,7 @@ async function addMember({
     log,
   );
 
-  if (!duplication.value.success) {
+  if (duplication.value.success) {
     log.trace({ error: "User already exists" });
     return Result.error("User is already in habit.");
   }
@@ -272,6 +272,19 @@ async function addMemberAsChecker({
 
   if (!userDetails.value.success)
     return Result.error("Could not get data about user");
+
+  const ud = userDetails.value.data;
+
+  const duplication = await drizzleOps.readWithCondition(
+    habitMembersTable,
+    (t) => and(eq(t.habit, habit), eq(t.member, ud.id)),
+    log,
+  );
+
+  if (duplication.value.success) {
+    log.trace({ error: "User already exists" });
+    return Result.error("User is already in habit.");
+  }
 
   const data = await drizzleOps.insert(
     habitMembersTable,
