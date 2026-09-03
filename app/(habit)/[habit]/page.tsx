@@ -15,6 +15,10 @@ import TaskDisplay from "./components/taskDisplay";
 import { InferSelectModel } from "drizzle-orm";
 import { habitProofsTable } from "@/db/schema";
 import ProofDisplay from "./components/proofDisplay";
+import { buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { IconHome } from "@tabler/icons-react";
 
 export default async function Page({
   params,
@@ -28,6 +32,11 @@ export default async function Page({
     log.print();
     redirect("/auth/login");
   }
+
+  const allHabits = await habitService.readHabitsByUser({
+    user: session.user.id,
+    log,
+  });
 
   const isAdmin = await habitOps.isUserAdmin({
     user: session.user.id,
@@ -53,6 +62,7 @@ export default async function Page({
   const tasks = await habitService.readTasksByHabit({ habit, log });
 
   if (
+    !allHabits.value.success ||
     !isAdmin.value.success ||
     !isMember.value.success ||
     !isChecker.value.success ||
@@ -85,102 +95,139 @@ export default async function Page({
 
   return (
     <MaxWContainer>
-      <ResizablePanelGroup
-        orientation="vertical"
-        className="min-h-screen pt-2 pb-1"
-      >
-        <ResizablePanel defaultSize={"100px"}>
-          {isAdmin.value.data ? (
-            <ResizablePanelGroup orientation="horizontal">
-              <ResizablePanel className="p-1 h-full -mt-1">
-                <div className="w-full p-4 flex gap-4 bg-card rounded-md h-24 overflow-y-hidden">
-                  {habitdata.value.data.header && (
-                    <ImageById
-                      id={habitdata.value.data.header}
-                      css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
-                    />
-                  )}
-                  <div>
-                    <h1 className="text-4xl font-bold tracking-tight">
-                      {habitdata.value.data.name}
-                    </h1>
-                    <h2 className="text-muted-foreground">
-                      {habitdata.value.data.description}
-                    </h2>
-                  </div>
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel className="p-1" defaultSize={"85px"}>
-                <HabitAdminSettings
-                  checker={false}
-                  name={habitdata.value.data.name}
-                  description={habitdata.value.data.description}
-                  habit={habit}
-                  members={members.value.data.filter(
-                    (m) => m.id !== session.user.id,
-                  )}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          ) : (
-            <div className="w-full h-full p-1">
-              <div className="w-full h-full p-4 flex gap-4 bg-card rounded-md">
-                {habitdata.value.data.header && (
-                  <ImageById
-                    id={habitdata.value.data.header}
-                    css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
-                  />
+      <ResizablePanelGroup>
+        <ResizablePanel defaultSize={"3.5em"} className="pt-2 pb-2 pr-1">
+          <div className="bg-card w-full h-full rounded-md p-2">
+            <div className="grid gap-2">
+              <Link
+                href={"/dashboard"}
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "truncate justify-start",
                 )}
-                <div className="-mt-1">
-                  <h1 className="text-4xl font-bold tracking-tight">
-                    {habitdata.value.data.name}
-                  </h1>
-                  <h2 className="text-muted-foreground">
-                    {habitdata.value.data.description}
-                  </h2>
-                </div>
-              </div>
+              >
+                <IconHome /> <span className="ml-1.5">Dashboard</span>
+              </Link>
+              {allHabits.value.data
+                .filter((i) => i.name !== habit)
+                .map((t, i) => (
+                  <Link
+                    key={t.id}
+                    href={`/${t.id}`}
+                    className={cn(
+                      buttonVariants({ variant: "secondary" }),
+                      "truncate justify-start",
+                    )}
+                  >
+                    <div>
+                      <span className="ml-1 mr-4">{i + 1}</span>
+                      <span>{t.name}</span>
+                    </div>
+                  </Link>
+                ))}
             </div>
-          )}
+          </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel>
-          <ResizablePanelGroup>
-            <ResizablePanel defaultSize={"75%"} className="p-1">
-              <div className="p-4 grid gap-4 bg-card w-full h-full rounded-md">
-                <div className="flex flex-col gap-2">
-                  {tasks.value.data.map((task) => (
-                    <TaskDisplay
+          <ResizablePanelGroup
+            orientation="vertical"
+            className="min-h-screen pt-2 pb-1"
+          >
+            <ResizablePanel defaultSize={"100px"}>
+              {isAdmin.value.data ? (
+                <ResizablePanelGroup orientation="horizontal">
+                  <ResizablePanel className="p-1 h-full -mt-1">
+                    <div className="w-full p-4 flex gap-4 bg-card rounded-md h-24 overflow-y-hidden">
+                      {habitdata.value.data.header && (
+                        <ImageById
+                          id={habitdata.value.data.header}
+                          css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
+                        />
+                      )}
+                      <div>
+                        <h1 className="text-4xl font-bold tracking-tight">
+                          {habitdata.value.data.name}
+                        </h1>
+                        <h2 className="text-muted-foreground">
+                          {habitdata.value.data.description}
+                        </h2>
+                      </div>
+                    </div>
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel className="p-1" defaultSize={"85px"}>
+                    <HabitAdminSettings
+                      checker={false}
+                      name={habitdata.value.data.name}
+                      description={habitdata.value.data.description}
                       habit={habit}
-                      key={task.id}
-                      task={task.id}
-                      description={task.description}
-                      name={task.task}
+                      members={members.value.data.filter(
+                        (m) => m.id !== session.user.id,
+                      )}
                     />
-                  ))}
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              ) : (
+                <div className="w-full h-full p-1">
+                  <div className="w-full h-full p-4 flex gap-4 bg-card rounded-md">
+                    {habitdata.value.data.header && (
+                      <ImageById
+                        id={habitdata.value.data.header}
+                        css="h-full rounded-lg border hover:drop-shadow-2xl transition duration-300 hover:scale-105"
+                      />
+                    )}
+                    <div className="-mt-1">
+                      <h1 className="text-4xl font-bold tracking-tight">
+                        {habitdata.value.data.name}
+                      </h1>
+                      <h2 className="text-muted-foreground">
+                        {habitdata.value.data.description}
+                      </h2>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel className="m-1">
-              <div className="rounded-md bg-card h-full">
-                <div className="flex flex-wrap gap-4 p-4 bg-card rounded-md">
-                  {proofArr.map((item) => (
-                    <ProofDisplay
-                      id={item.id}
-                      currentUser={session.user.id}
-                      proofTime={item.timeStamp}
-                      task={item.task}
-                      userid={item.user}
-                      key={item.id}
-                      proofStatus={item.proofStatus}
-                      description={item.description}
-                      media={item.media}
-                    />
-                  ))}
-                </div>
-              </div>
+            <ResizablePanel>
+              <ResizablePanelGroup>
+                <ResizablePanel defaultSize={"75%"} className="p-1">
+                  <div className="p-4 grid gap-4 bg-card w-full h-full rounded-md">
+                    <div className="flex flex-col gap-2">
+                      {tasks.value.data.map((task) => (
+                        <TaskDisplay
+                          habit={habit}
+                          key={task.id}
+                          task={task.id}
+                          description={task.description}
+                          name={task.task}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel className="m-1">
+                  <div className="rounded-md bg-card h-full">
+                    <div className="flex flex-wrap gap-4 p-4 bg-card rounded-md">
+                      {proofArr.map((item) => (
+                        <ProofDisplay
+                          id={item.id}
+                          currentUser={session.user.id}
+                          proofTime={item.timeStamp}
+                          task={item.task}
+                          userid={item.user}
+                          key={item.id}
+                          proofStatus={item.proofStatus}
+                          description={item.description}
+                          media={item.media}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
