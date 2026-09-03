@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import ImageInput from "@/components/badcn/imageInput";
 
 const updateHeaderSchema = z.object({
-  file: z.file(),
+  file: z.file().refine((file) => file.size < 4.5 * 1024 * 1024),
   habit: z.string().min(1),
 });
 type UpdateHeaderValues = z.infer<typeof updateHeaderSchema>;

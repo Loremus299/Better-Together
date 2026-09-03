@@ -25,6 +25,7 @@ const addProofSchema = z.object({
   media: z
     .file()
     .refine((item) => ["image/png", "image/jpeg"].includes(item.type))
+    .refine((file) => file.size < 4.5 * 1024 * 1024)
     .optional(),
 });
 type AddProofValues = z.infer<typeof addProofSchema>;

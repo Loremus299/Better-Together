@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     if (
       !(
         ["image/png", "image/jpeg", "image/gif"].includes(file.type) &&
-        file.size < 10 * 1024 * 1024
+        file.size < 4.5 * 1024 * 1024
       )
     ) {
       log.error({ error: "File validation failed" });
