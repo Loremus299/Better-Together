@@ -20,20 +20,22 @@ export default function Account() {
       <DropdownMenuTrigger className="w-full h-full grid place-items-center bg-card rounded-md">
         <IconUser />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="max-w-sm w-full">
-        <DropdownMenuGroup>
-          <Button
-            variant={"ghost"}
-            className={"cursor-copy"}
-            onClick={() => {
-              navigator.clipboard.writeText(session.data!.user.email);
-              toast.info("Email copied to clipboard.");
-            }}
-          >
-            <IconCopy /> Copy Email.
-          </Button>
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
+      <DropdownMenuContent className="max-w-sm w-full p-2">
+        <DropdownMenuGroup className={"flex flex-col items-start gap-2"}>
+          <div className="flex items-center text-sm p-2 border border-dashed rounded-xl bg-muted ">
+            <p className="font-mono">{session.data?.user.email}</p>
+            <Button
+              variant={"ghost"}
+              className={"cursor-copy"}
+              size={"icon-xs"}
+              onClick={() => {
+                navigator.clipboard.writeText(session.data!.user.email);
+                toast.info("Email copied to clipboard.");
+              }}
+            >
+              <IconCopy />
+            </Button>
+          </div>
           <Button
             variant={"ghost"}
             className={"text-destructive"}

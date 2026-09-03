@@ -11,6 +11,8 @@ import HabitDisplay from "./components/habitDisplay";
 import IncompleteTaskDisplay from "./components/incompleteTaskDisplay";
 import StreakCalDisplay from "./components/streakCalDisplay";
 import Account from "./components/account";
+import Link from "next/link";
+import { IconPlus } from "@tabler/icons-react";
 
 export default async function Page() {
   const session = await getSession();
@@ -28,6 +30,14 @@ export default async function Page() {
           <ResizablePanelGroup orientation="horizontal">
             <ResizablePanel defaultSize={"4em"} className="p-1">
               <Account />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={"4em"} className="p-1">
+              <div className="w-full h-full bg-card rounded-md grid place-items-center">
+                <Link href={"/new"}>
+                  <IconPlus />
+                </Link>
+              </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
