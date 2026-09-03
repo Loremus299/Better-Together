@@ -4,7 +4,7 @@ import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import { ViewTransition } from "react";
 
-export default async function Navbar({
+export default function Navbar({
   habits,
   currentTab,
   landscape,
@@ -44,9 +44,7 @@ export default async function Navbar({
               )}
             >
               <div>
-                <span className={landscape ? "" : "ml-1 mr-4"}>
-                  {landscape ? t.name : i + 1}
-                </span>
+                <span className={landscape ? "" : "ml-1 mr-4"}>{i + 1}</span>
                 {landscape ? "" : <span>{t.name}</span>}
               </div>
             </Link>

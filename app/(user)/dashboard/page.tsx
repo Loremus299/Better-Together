@@ -13,9 +13,9 @@ import StreakCalDisplay from "./components/streakCalDisplay";
 import Account from "./components/account";
 import Link from "next/link";
 import { IconPlus } from "@tabler/icons-react";
-import Navbar from "@/components/navbar";
 import { habitService } from "@/app/api/habit/service";
 import { Logger } from "@/lib/logger";
+import NavbarLandscape from "@/components/navbarLandscape";
 
 export default async function Page() {
   const log = new Logger();
@@ -55,10 +55,9 @@ export default async function Page() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="p-1">
-              <Navbar
+              <NavbarLandscape
                 currentTab="dashboard"
                 habits={habits.value.data}
-                landscape={true}
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
