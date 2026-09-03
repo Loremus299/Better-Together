@@ -43,7 +43,7 @@ async function create({
       {
         habit: t.id,
         task: "Invite partner",
-        description: "Invite your partner to hold each other accountable",
+        description: "Invite your partner to hold each other accountable.",
       },
       log,
     );
@@ -51,8 +51,8 @@ async function create({
       habitTasksTable,
       {
         habit: t.id,
-        task: "Add habits",
-        description: "Add habits to do together everyday.",
+        task: "Add tasks",
+        description: "Add tasks to do together everyday.",
       },
       log,
     );

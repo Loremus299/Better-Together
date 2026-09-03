@@ -108,23 +108,22 @@ export default async function Page({
               >
                 <IconHome /> <span className="ml-1.5">Dashboard</span>
               </Link>
-              {allHabits.value.data
-                .filter((i) => i.name !== habit)
-                .map((t, i) => (
-                  <Link
-                    key={t.id}
-                    href={`/${t.id}`}
-                    className={cn(
-                      buttonVariants({ variant: "secondary" }),
-                      "truncate justify-start",
-                    )}
-                  >
-                    <div>
-                      <span className="ml-1 mr-4">{i + 1}</span>
-                      <span>{t.name}</span>
-                    </div>
-                  </Link>
-                ))}
+              {allHabits.value.data.map((t, i) => (
+                <Link
+                  key={t.id}
+                  href={`/${t.id}`}
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "truncate justify-start",
+                    t.id === habit ? "bg-primary" : "bg-secondary",
+                  )}
+                >
+                  <div>
+                    <span className="ml-1 mr-4">{i + 1}</span>
+                    <span>{t.name}</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </ResizablePanel>
