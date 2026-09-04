@@ -16,6 +16,9 @@ import { IconPlus } from "@tabler/icons-react";
 import { habitService } from "@/app/api/habit/service";
 import { Logger } from "@/lib/logger";
 import NavbarLandscape from "@/components/navbarLandscape";
+import { habitProofsTable } from "@/db/schema";
+import { InferSelectModel } from "drizzle-orm";
+import ProofDisplay from "./components/proofDisplay";
 
 export default async function Page() {
   const log = new Logger();
@@ -32,6 +35,23 @@ export default async function Page() {
   if (!habits.value.success) {
     log.print();
     redirect(`/error?e=${habits.value.error}&id=${log.getId()}`);
+  }
+
+  const proofArr: InferSelectModel<typeof habitProofsTable>[] = [];
+
+  for (const habit of habits.value.data) {
+    const tasks = await habitService.readTasksByHabit({ habit: habit.id, log });
+    if (!tasks.value.success) {
+      log.print();
+      redirect(`/error?e=${tasks.value.error}&id=${log.getId()}`);
+    }
+
+    for (const task of tasks.value.data) {
+      const proof = await habitService.readProofsByTask({ task: task.id, log });
+      if (proof.value.success) {
+        proof.value.data.forEach((item) => proofArr.push(item));
+      }
+    }
   }
 
   return (
@@ -84,7 +104,27 @@ export default async function Page() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="m-1">
-              <IncompleteTaskDisplay user={session.user.id} />
+              <ResizablePanelGroup orientation="vertical" className="gap-2">
+                <ResizablePanel>
+                  <IncompleteTaskDisplay user={session.user.id} />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel className="p-4 bg-card rounded-md">
+                  {proofArr.map((item) => (
+                    <ProofDisplay
+                      currentUser={session.user.id}
+                      description={item.description}
+                      id={item.id}
+                      media={item.media}
+                      proofStatus={item.proofStatus}
+                      proofTime={item.timeStamp}
+                      task={item.task}
+                      userid={item.user}
+                      key={item.id}
+                    />
+                  ))}
+                </ResizablePanel>
+              </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
