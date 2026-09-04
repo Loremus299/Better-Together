@@ -92,15 +92,15 @@ export default function Home() {
                 width={2000}
                 height={2000}
                 alt="screenshot"
-                className="w-1/2 mt-4 rounded-t-md"
+                className="landscape:w-1/2 portrait:w-full mt-4 rounded-t-md "
               />
             </div>
           </div>
         </main>
       </div>
       <div className="h-screen p-4 flex flex-col" id="features">
-        <main className="bg-card rounded-md h-full flex flex-col">
-          <div className="border-b-10 border-muted p-4 flex-1 h-full grid grid-cols-3 grid-rows-2 gap-4">
+        <main className="bg-card rounded-md landscape:h-full flex flex-col">
+          <div className=" border-b-10 border-muted p-4 flex-1 h-full grid landscape:grid-cols-3 landscape:grid-rows-2 portrait:grid-rows-5 gap-4">
             <Card>
               <CardHeader>
                 <CardTitle>1. Create habits.</CardTitle>
@@ -133,7 +133,7 @@ export default function Home() {
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="row-span-2">
+            <Card className="landscape:row-span-2">
               <CardHeader>
                 <CardTitle>5. Share your progress.</CardTitle>
                 <CardDescription className="text-primary">
@@ -180,7 +180,7 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-          <div className="p-4 grid landscape:grid-cols-3 portrait:grid-rows-3 gap-4 justify-start items-start">
+          <div className="p-4 grid landscape:grid-cols-3 portrait:grid-rows-2 gap-4 justify-start items-start">
             <div>
               <div className="flex items-center gap-2">
                 <Image
@@ -204,7 +204,7 @@ export default function Home() {
                 Be gay, do crimes.
               </h4>
             </div>
-            <div />
+            <div className="portrait:hidden" />
             <div className="text-sm grid gap-2">
               <h4 className="text-primary mt-2 font-semibold tracking-tight text-lg">
                 Links.
