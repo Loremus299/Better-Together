@@ -1,6 +1,13 @@
 "use client";
 import MaxWContainer from "@/components/maxWContainer";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
@@ -93,7 +100,86 @@ export default function Home() {
       </div>
       <div className="h-screen p-4 flex flex-col" id="features">
         <main className="bg-card rounded-md h-full flex flex-col">
-          <div className="border-b-10 border-muted p-4 flex-1">Hi</div>
+          <div className="border-b-10 border-muted p-4 flex-1 h-full grid grid-cols-3 grid-rows-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>1. Create habits.</CardTitle>
+                <CardDescription className="text-primary">
+                  Create habits with your partner, working towards a shared
+                  goal.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <CardDescription>
+                  Whether it be sharing a morning routine, learning a new
+                  language, exercising together, watching movies together, photo
+                  journal. Better Together can help with that.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>2. Invite partner.</CardTitle>
+                <CardDescription className="text-primary">
+                  Invite your partner to build routines together and stay close
+                  every step of the way.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <CardDescription>
+                  Whether you&apos;re across the room or miles apart, share your
+                  daily progress, send proof, and turn small individual habits
+                  into a romantic moment.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card className="row-span-2">
+              <CardHeader>
+                <CardTitle>5. Share your progress.</CardTitle>
+                <CardDescription className="text-primary">
+                  Turn your progress into a snapshot.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <CardDescription>
+                  Share the progress of your every task to your partner. Review
+                  each other and help each other. Consistency is easier with
+                  someone you can&apos;t lie to. Better Together automates the
+                  process of proofs, approvals, daily repetition between you and
+                  your partner.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>3. Add tasks.</CardTitle>
+                <CardDescription className="text-primary">
+                  Add daily tasks to in habit to celebrate every small win
+                  together.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <CardDescription>
+                  Set shared goals, from morning check-ins to evening workouts
+                  and show up for one another every single day.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>4. Create your streak.</CardTitle>
+                <CardDescription className="text-primary">
+                  Watch all your effort light up your own streak calendar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <CardDescription>
+                  Every proof you add, every approval you get, lights your
+                  personal calendar and future together brighter and brighter.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
           <div className="p-4 grid landscape:grid-cols-3 portrait:grid-rows-3 gap-4 justify-start items-start">
             <div>
               <div className="flex items-center gap-2">
@@ -128,21 +214,21 @@ export default function Home() {
                   href={"https://gal.gay"}
                   className="flex gap-1 items-center"
                 >
-                  <IconLicense className="size-4" />
-                  Gay Agenda License - 1.0
+                  <IconLicense className="size-4 stroke-1" />
+                  Gay Agenda License
                 </Link>
                 <Link
                   href={"https://gal.gay"}
                   className="flex gap-1 items-center"
                 >
-                  <IconBrandGithub className="size-4" />
+                  <IconBrandGithub className="size-4 stroke-1" />
                   Github
                 </Link>
                 <Link
                   href={"https://better-together.loremus.gay"}
                   className="flex gap-1 items-center"
                 >
-                  <IconWorld className="size-4" />
+                  <IconWorld className="size-4 stroke-1" />
                   Project
                 </Link>
               </div>
